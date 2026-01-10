@@ -88,7 +88,7 @@ function renderAdvancedSummary(data, type) {
 
         summaryEl.innerHTML = groupEntries.map(([group, subcounts]) => {
             const total = Object.values(subcounts).reduce((sum, val) => sum + val, 0);
-            const subs = Object.entries(subcounts).sort((a, b) => b[1] - a[1]);
+            const subs = Object.entries(subcounts).sort((a, b) => a[0].localeCompare(b[0], 'id', { numeric: true }));
             const subRows = subs.map(([label, count]) => `
                 <div class="overview-row overview-subrow">
                     <span>${label}</span>
@@ -115,6 +115,7 @@ function renderAdvancedSummary(data, type) {
     }
 
     const sorted = Object.entries(counts).sort((a, b) => {
+        if (type === 'konsulat') return a[0].localeCompare(b[0], 'id', { numeric: true });
         if (type !== 'kelas') return b[1] - a[1];
         const parse = (label) => {
             const match = label.match(/^(\d+)\s*-?\s*([A-Za-z]*)/);
