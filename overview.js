@@ -22,6 +22,15 @@ function normalizeKelas(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
 }
 
+function parseKelasKey(kelas) {
+    const normalized = normalizeKelas(kelas).replace(/\s+/g, '');
+    const match = normalized.match(/^(\d+)([A-Za-z]+)?$/);
+    if (!match) {
+        return { num: Number.MAX_SAFE_INTEGER, suffix: normalized || 'zz' };
+    }
+    return { num: parseInt(match[1], 10), suffix: (match[2] || '').toUpperCase() };
+}
+
 function getKelasGroup(kelas) {
     const normalized = normalizeKelas(kelas);
     if (!normalized) return 'Tidak diketahui';
@@ -88,7 +97,12 @@ function renderAdvancedSummary(data, type) {
 
         summaryEl.innerHTML = groupEntries.map(([group, subcounts]) => {
             const total = Object.values(subcounts).reduce((sum, val) => sum + val, 0);
-            const subs = Object.entries(subcounts).sort((a, b) => a[0].localeCompare(b[0], 'id', { numeric: true }));
+            const subs = Object.entries(subcounts).sort((a, b) => {
+                const aKey = parseKelasKey(a[0]);
+                const bKey = parseKelasKey(b[0]);
+                if (aKey.num !== bKey.num) return aKey.num - bKey.num;
+                return aKey.suffix.localeCompare(bKey.suffix, 'id', { numeric: true });
+            });
             const subRows = subs.map(([label, count]) => `
                 <div class="overview-row overview-subrow">
                     <span>${label}</span>
@@ -115,7 +129,9 @@ function renderAdvancedSummary(data, type) {
     }
 
     const sorted = Object.entries(counts).sort((a, b) => {
-        if (type === 'konsulat') return a[0].localeCompare(b[0], 'id', { numeric: true });
+        if (type === 'konsulat') {
+            return a[0].toString().trim().localeCompare(b[0].toString().trim(), 'id', { sensitivity: 'base', numeric: true });
+        }
         if (type !== 'kelas') return b[1] - a[1];
         const parse = (label) => {
             const match = label.match(/^(\d+)\s*-?\s*([A-Za-z]*)/);
