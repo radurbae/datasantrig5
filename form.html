@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Data Santri - Database Santri PMDG Kampus 5 Darul Qiyam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-row">
+                    <h2>📚 Database Santri</h2>
+                    <button class="sidebar-toggle" type="button" aria-label="Toggle menu">☰</button>
+                </div>
+                <span>PMDG Kampus 5 Darul Qiyam</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="overview.html" class="sidebar-link">📊 Overview</a>
+                <a href="form.html" class="sidebar-link active" data-admin-only>➕ Input Data</a>
+                <a href="list.html" class="sidebar-link">📋 List Data</a>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="nav-role" data-role-label></span>
+                <a href="login.html" class="sidebar-link nav-logout" data-logout>Keluar</a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="content-wrap">
+                <header class="page-header">
+                    <h1>Input Data Santri</h1>
+                    <p class="subtitle">Tambahkan atau edit data santri baru</p>
+                </header>
+
+                <!-- Form Input/Edit Santri -->
+                <section class="form-section">
+                    <div class="form-card">
+                        <h2 id="form-title">Tambah Data Santri Baru</h2>
+                        <form id="santri-form">
+                    <input type="hidden" id="edit-id" value="">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nomor-stambuk">Nomor Stambuk *</label>
+                            <input type="text" id="nomor-stambuk" placeholder="Contoh: 1.41.78508" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nama">Nama Lengkap *</label>
+                            <input type="text" id="nama" placeholder="Nama Lengkap Santri" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ayah">Nama Ayah *</label>
+                            <input type="text" id="ayah" placeholder="Nama Ayah Santri" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select id="status" required>
+                                <option value="">Pilih Status</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Mengundurkan Diri">Mengundurkan Diri</option>
+                                <option value="Istirahat">Istirahat</option>
+                                <option value="Skorsing">Skorsing</option>
+                                <option value="Pindah Kampus">Pindah Kampus</option>
+                                <option value="Dikeluarkan">Dikeluarkan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tempat-lahir">Tempat Lahir</label>
+                            <input type="text" id="tempat-lahir" placeholder="Contoh: Jakarta">
+                        </div>
+                        <div class="form-group">
+                            <label for="tanggal-lahir">Tanggal Lahir</label>
+                            <input type="date" id="tanggal-lahir">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="daerah">Daerah *</label>
+                            <input type="text" id="daerah" placeholder="Contoh: Jakarta, Bandung, Surabaya" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="kelas">Kelas *</label>
+                            <input type="text" id="kelas" placeholder="Contoh: 6B" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="no-absen">No Absen</label>
+                            <input type="number" id="no-absen" placeholder="Nomor Absen di Kelas" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="asrama">Asrama</label>
+                            <input type="text" id="asrama" placeholder="Nama Asrama">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="konsulat">Konsulat</label>
+                            <input type="text" id="konsulat" placeholder="Nama Konsulat/wilayah">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">Tambah Data</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-btn" style="display: none;">Batal</button>
+                    </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Load scripts in order -->
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="db.js"></script>
+    <script src="form.js"></script>
+</body>
+</html>

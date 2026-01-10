@@ -1,1 +1,287 @@
-# datasantrig5
+# Database Santri - Sistem Manajemen Data Santri
+
+Sistem manajemen data santri untuk pondok pesantren dengan menggunakan Supabase sebagai database backend.
+
+## 🚀 Fitur
+
+- ✅ Input/Edit data santri
+- ✅ Daftar santri dengan tampilan ringkasan (Nama, Kelas, Daerah, Status)
+- ✅ Halaman detail lengkap untuk setiap santri
+- ✅ Pencarian dan filter data
+- ✅ Database Supabase (PostgreSQL)
+
+## 📋 Struktur Data
+
+Data santri memiliki field berikut:
+- **Nomor Stambuk** (wajib)
+- **Nama** (wajib)
+- **Ayah** (wajib)
+- **Tempat dan Tanggal Lahir**
+- **Daerah** (wajib)
+- **Status** (wajib: Aktif, Mutasi Keluar, Istirahat, Skorsing, Pindah Kampus, Dikeluarkan)
+- **Kelas** (wajib)
+- **No Absen**
+- **Asrama**
+- **Konsulat**
+
+## 🛠️ Setup Supabase
+
+### 1. Buat Project di Supabase
+
+1. Buka [https://app.supabase.com](https://app.supabase.com)
+2. Buat akun atau login
+3. Klik "New Project"
+4. Isi informasi project:
+   - **Name**: Database Santri (atau nama sesuai keinginan)
+   - **Database Password**: Buat password yang kuat
+   - **Region**: Pilih region terdekat (misalnya: Southeast Asia (Singapore))
+5. Klik "Create new project" dan tunggu proses setup selesai (sekitar 2 menit)
+
+### 2. Buat Table di Supabase
+
+1. Setelah project dibuat, buka **SQL Editor** di sidebar kiri
+2. Klik "New Query"
+3. Copy dan paste SQL berikut:
+
+```sql
+-- Buat table santri
+CREATE TABLE IF NOT EXISTS santri (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    nomor_stambuk TEXT,
+    nama TEXT NOT NULL,
+    ayah TEXT NOT NULL,
+    tempat_lahir TEXT,
+    tanggal_lahir DATE,
+    daerah TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Aktif',
+    kelas TEXT NOT NULL,
+    no_absen INTEGER,
+    asrama TEXT,
+    konsulat TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Buat index untuk pencarian yang lebih cepat
+CREATE INDEX IF NOT EXISTS idx_santri_nama ON santri(nama);
+CREATE INDEX IF NOT EXISTS idx_santri_kelas ON santri(kelas);
+CREATE INDEX IF NOT EXISTS idx_santri_daerah ON santri(daerah);
+CREATE INDEX IF NOT EXISTS idx_santri_status ON santri(status);
+
+-- Buat function untuk update updated_at otomatis
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Buat trigger untuk update updated_at
+CREATE TRIGGER update_santri_updated_at
+    BEFORE UPDATE ON santri
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Enable Row Level Security (RLS) - opsional, sesuaikan dengan kebutuhan
+-- ALTER TABLE santri ENABLE ROW LEVEL SECURITY;
+
+-- Buat policy untuk allow all operations (untuk development)
+-- Sesuaikan dengan kebutuhan security Anda
+-- CREATE POLICY "Allow all operations" ON santri
+--     FOR ALL
+--     USING (true)
+--     WITH CHECK (true);
+```
+
+4. Klik "Run" untuk menjalankan query
+5. Pastikan tidak ada error
+
+### 3. Dapatkan API Keys
+
+1. Buka **Settings** (ikon gear) di sidebar kiri
+2. Pilih **API**
+3. Di bagian **Project API keys**, copy:
+   - **Project URL** (Contoh: `https://abcdefghijklmnop.supabase.co`)
+   - **anon public** key (Contoh: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`)
+
+### 4. Konfigurasi di Aplikasi
+
+1. Buka file `config.js`
+2. Ganti `YOUR_SUPABASE_PROJECT_URL` dengan **Project URL** dari Supabase
+3. Ganti `YOUR_SUPABASE_ANON_KEY` dengan **anon public** key dari Supabase
+
+Contoh:
+```javascript
+const SUPABASE_CONFIG = {
+    url: 'https://abcdefghijklmnop.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFiY2RlZmdoaWprbG1ub3AiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNjIzOTAyMiwiZXhwIjoxOTMxODE1MDIyfQ...'
+};
+```
+
+### 5. Setup Login (Email + Password) dan Role
+
+1. Buat tabel `profiles` di Supabase:
+
+```sql
+CREATE TABLE IF NOT EXISTS profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'user',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+2. Aktifkan RLS di `profiles` dan `santri`, lalu tambahkan policy berikut:
+
+```sql
+-- Profiles: user boleh melihat profil sendiri
+CREATE POLICY "Profiles are viewable by owner"
+ON profiles FOR SELECT
+USING (auth.uid() = id);
+
+-- Profiles: admin boleh update role (opsional)
+CREATE POLICY "Admins can update roles"
+ON profiles FOR UPDATE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+-- Santri: semua user login boleh lihat
+CREATE POLICY "Santri are viewable by authenticated users"
+ON santri FOR SELECT
+USING (auth.role() = 'authenticated');
+
+-- Santri: hanya admin boleh insert/update/delete
+CREATE POLICY "Admins can insert santri"
+ON santri FOR INSERT
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins can update santri"
+ON santri FOR UPDATE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins can delete santri"
+ON santri FOR DELETE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+```
+
+3. Setelah membuat user di Supabase Auth, isi tabel `profiles` dengan role `admin` atau `user`.
+
+### 6. Setup Row Level Security (Opsional)
+
+Jika Anda ingin mengaktifkan Row Level Security (RLS) untuk keamanan:
+
+1. Di SQL Editor, uncomment bagian policy di SQL query di atas
+2. Atau buat policy khusus sesuai kebutuhan Anda
+
+Untuk development/testing, Anda bisa disable RLS terlebih dahulu:
+```sql
+ALTER TABLE santri DISABLE ROW LEVEL SECURITY;
+```
+
+## 📁 Struktur File
+
+```
+belajar/
+├── index.html          # Halaman utama
+├── form.html           # Form input/edit santri
+├── form.js             # Logic form
+├── list.html           # Daftar santri
+├── list.js             # Logic list & filter
+├── detail.html         # Halaman detail santri
+├── detail.js           # Logic detail page
+├── config.js           # Konfigurasi Supabase
+├── db.js               # Database service layer
+├── style.css           # Styling
+└── README.md           # Dokumentasi ini
+```
+
+## 🔧 Cara Menggunakan
+
+### 1. Setup Supabase
+Ikuti langkah-langkah di atas untuk setup Supabase
+
+### 2. Buka Aplikasi
+- Buka file `index.html` di browser
+- Atau gunakan local server (misalnya: `python -m http.server` atau `npx serve`)
+
+### 3. Input Data
+- Klik "Input Data" di menu navigasi
+- Isi form dengan data santri
+- Klik "Tambah Data" untuk menyimpan
+
+### 4. Lihat Daftar
+- Klik "List Data" di menu navigasi
+- Gunakan search box untuk mencari santri
+- Gunakan filter untuk memfilter berdasarkan Kelas, Daerah, atau Status
+- Klik "Detail" untuk melihat biodata lengkap
+
+### 5. Edit/Hapus Data
+- Dari list, klik "Edit" untuk mengubah data
+- Dari list atau detail, klik "Hapus" untuk menghapus data
+
+## 🔒 Keamanan
+
+- **Anon Key**: Key ini aman digunakan di client-side, namun tidak memiliki akses langsung ke data tanpa policy
+- **Row Level Security**: Aktifkan RLS dan buat policy sesuai kebutuhan untuk keamanan data
+- **Service Role Key**: JANGAN pernah expose service role key di client-side, gunakan hanya di backend
+
+## 🔐 Login
+
+- Buka `login.html` untuk masuk.
+- Role `admin` dapat menambah, edit, dan hapus data.
+- Role `user` hanya bisa melihat data.
+- Setelah login, halaman awal diarahkan ke `overview.html`.
+
+## 📝 Catatan
+
+- Pastikan Anda sudah mengisi `config.js` dengan benar sebelum menggunakan aplikasi
+- Jika terjadi error "Supabase belum dikonfigurasi", pastikan URL dan API Key sudah diisi di `config.js`
+- Data akan tersimpan di Supabase database dan bisa diakses dari mana saja selama terhubung internet
+
+## 🐛 Troubleshooting
+
+### Error: "Supabase belum dikonfigurasi"
+- Pastikan Anda sudah mengisi `SUPABASE_CONFIG` di `config.js`
+- Pastikan URL dan API Key benar (copy dari Supabase dashboard)
+
+### Error: "relation 'santri' does not exist"
+- Pastikan Anda sudah membuat table dengan SQL query yang disediakan
+- Pastikan nama table adalah `santri` (lowercase)
+
+### Error: "new row violates row-level security policy"
+- Disable RLS untuk testing: `ALTER TABLE santri DISABLE ROW LEVEL SECURITY;`
+- Atau buat policy yang sesuai untuk allow operations
+
+### Data tidak muncul setelah diinput
+- Cek browser console untuk melihat error
+- Pastikan koneksi internet stabil
+- Cek di Supabase dashboard apakah data sudah masuk ke table
+
+## 📚 Referensi
+
+- [Supabase Documentation](https://supabase.com/docs)
+- [Supabase JavaScript Client](https://supabase.com/docs/reference/javascript/introduction)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+
+## 📄 License
+
+Project ini untuk keperluan edukasi dan penggunaan internal.

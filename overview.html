@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overview - Database Santri PMDG Kampus 5 Darul Qiyam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-row">
+                    <h2>📚 Database Santri</h2>
+                    <button class="sidebar-toggle" type="button" aria-label="Toggle menu">☰</button>
+                </div>
+                <span>PMDG Kampus 5 Darul Qiyam</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="overview.html" class="sidebar-link active">📊 Overview</a>
+                <a href="form.html" class="sidebar-link" data-admin-only>➕ Input Data</a>
+                <a href="list.html" class="sidebar-link">📋 List Data</a>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="nav-role" data-role-label></span>
+                <a href="login.html" class="sidebar-link nav-logout" data-logout>Keluar</a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="content-wrap">
+                <header class="page-header">
+                    <h1>Overview</h1>
+                    <p class="subtitle">Ringkasan Data Santri PMDG Kampus 5 Darul Qiyam Terkini</p>
+                </header>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Ringkasan Status</h2>
+                            <span id="status-total" class="overview-total">Total: 0</span>
+                        </div>
+                        <div id="status-summary" class="overview-grid"></div>
+                    </div>
+                </section>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Ringkasan Lanjutan</h2>
+                            <div class="overview-tabs">
+                                <button class="tab-btn active" data-summary="angkatan">Angkatan</button>
+                                <button class="tab-btn" data-summary="kelas">Kelas</button>
+                                <button class="tab-btn" data-summary="konsulat">Konsulat</button>
+                            </div>
+                        </div>
+                        <div id="advanced-summary" class="overview-list"></div>
+                    </div>
+                </section>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Ulang Tahun Hari Ini</h2>
+                            <span id="birthday-total" class="overview-total">0 santri</span>
+                        </div>
+                        <div id="birthday-alert" class="birthday-alert"></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="db.js"></script>
+    <script src="overview.js"></script>
+</body>
+</html>
