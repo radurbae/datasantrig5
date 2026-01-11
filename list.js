@@ -2,6 +2,8 @@
 
 let santriData = [];
 let filteredData = [];
+let currentPage = 1;
+const PAGE_SIZE = 50;
 
 function statusClassName(status) {
     return (status || '').toLowerCase().replace(/\s+/g, '-');
@@ -47,6 +49,7 @@ async function loadData() {
         santriData = await getAllSantri();
         santriData.sort(sortByKelasAndAbsen);
         filteredData = [...santriData];
+        currentPage = 1;
         renderTable();
         updateFilterOptions();
         updateStats();
@@ -80,6 +83,26 @@ function setupEventListeners() {
     if (filterStatus) {
         filterStatus.addEventListener('change', handleFilter);
     }
+
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage -= 1;
+                renderTable();
+            }
+        });
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+            if (currentPage < totalPages) {
+                currentPage += 1;
+                renderTable();
+            }
+        });
+    }
 }
 
 // Render table
@@ -91,11 +114,14 @@ function renderTable() {
     if (filteredData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Tidak ada data santri yang sesuai filter.</td></tr>';
         updateStats();
+        updatePagination();
         return;
     }
 
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const pageItems = filteredData.slice(startIndex, startIndex + PAGE_SIZE);
     const isAdmin = window.currentUserRole === 'admin';
-    tbody.innerHTML = filteredData.map((santri, index) => {
+    tbody.innerHTML = pageItems.map((santri, index) => {
         const statusClass = `badge-${statusClassName(santri.status)}`;
         const adminButtons = isAdmin ? `
                         <button class="btn btn-warning" onclick="editSantri('${santri.id}')">Edit</button>
@@ -103,7 +129,7 @@ function renderTable() {
         ` : '';
         return `
             <tr>
-                <td>${index + 1}</td>
+                <td>${startIndex + index + 1}</td>
                 <td><strong>${escapeHtml(santri.nama || '-')}</strong></td>
                 <td>${escapeHtml(santri.kelas || '-')}</td>
                 <td>${escapeHtml(santri.daerah || '-')}</td>
@@ -119,6 +145,7 @@ function renderTable() {
     }).join('');
 
     updateStats();
+    updatePagination();
 }
 
 // Edit santri - redirect to form page
@@ -190,6 +217,7 @@ function applyFilters(searchTerm = '') {
         return matchesSearch && matchesKelas && matchesDaerah && matchesStatus;
     });
 
+    currentPage = 1;
     renderTable();
 }
 
@@ -231,6 +259,25 @@ function updateStats() {
     const statsElement = document.getElementById('total-count');
     if (statsElement) {
         statsElement.textContent = statsText;
+    }
+}
+
+function updatePagination() {
+    const pageInfo = document.getElementById('page-info');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    if (pageInfo) {
+        pageInfo.textContent = `Halaman ${currentPage} dari ${totalPages}`;
+    }
+    if (prevBtn) {
+        prevBtn.disabled = currentPage <= 1;
+    }
+    if (nextBtn) {
+        nextBtn.disabled = currentPage >= totalPages;
     }
 }
 
