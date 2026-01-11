@@ -76,15 +76,26 @@ function buildFields() {
     const container = document.getElementById('report-fields');
     if (!container) return;
     container.innerHTML = RAPORT_CATEGORIES.map(cat => `
-        <div class="report-field">
-            <label for="${cat.key}-score">${cat.label}</label>
-            <div class="report-input-row">
-                <input type="number" id="${cat.key}-score" min="1" max="${cat.max}" placeholder="1-${cat.max}">
-                <span class="report-badge" id="${cat.key}-badge">-</span>
+        <details class="report-item" data-key="${cat.key}">
+            <summary>
+                <div class="report-item-title">${cat.label}</div>
+                <div class="report-item-meta">
+                    <span class="report-badge" id="${cat.key}-badge">-</span>
+                    <span class="report-saved" id="${cat.key}-saved">Belum</span>
+                </div>
+            </summary>
+            <div class="report-item-body">
+                <div class="report-input-row">
+                    <input type="number" id="${cat.key}-score" min="1" max="${cat.max}" placeholder="1-${cat.max}">
+                    <span class="report-max">Maks ${cat.max}</span>
+                </div>
+                <textarea id="${cat.key}-note" rows="3" placeholder="Kegiatan/alasan penilaian"></textarea>
+                <div class="report-item-actions">
+                    <small class="report-hint">Kategori otomatis</small>
+                    <button type="button" class="btn btn-secondary report-save" data-key="${cat.key}">Simpan Kategori</button>
+                </div>
             </div>
-            <textarea id="${cat.key}-note" rows="2" placeholder="Kegiatan/alasan penilaian"></textarea>
-            <small class="report-hint">Skor 1-${cat.max} • Kategori otomatis</small>
-        </div>
+        </details>
     `).join('');
 
     RAPORT_CATEGORIES.forEach(cat => {
@@ -94,7 +105,12 @@ function buildFields() {
             scoreInput.addEventListener('input', () => {
                 const value = parseInt(scoreInput.value, 10);
                 badge.textContent = getCategoryLabel(cat.max, value);
+                updateProgress();
             });
+        }
+        const noteInput = document.getElementById(`${cat.key}-note`);
+        if (noteInput) {
+            noteInput.addEventListener('input', updateProgress);
         }
     });
 }
@@ -116,12 +132,15 @@ function fillForm(report) {
         const scoreInput = document.getElementById(`${cat.key}-score`);
         const noteInput = document.getElementById(`${cat.key}-note`);
         const badge = document.getElementById(`${cat.key}-badge`);
+        const saved = document.getElementById(`${cat.key}-saved`);
         const scoreValue = report ? report[`${cat.key}_score`] : '';
         const noteValue = report ? report[`${cat.key}_note`] : '';
         if (scoreInput) scoreInput.value = scoreValue || '';
         if (noteInput) noteInput.value = noteValue || '';
         if (badge) badge.textContent = getCategoryLabel(cat.max, scoreValue);
+        if (saved) saved.textContent = scoreValue && noteValue ? 'Tersimpan' : 'Belum';
     });
+    updateProgress();
 }
 
 function updateMonthLabel() {
@@ -171,17 +190,64 @@ function getReportPayload(santriId) {
 }
 
 function validatePayload(payload) {
+    let hasAny = false;
     for (const cat of RAPORT_CATEGORIES) {
         const score = payload[`${cat.key}_score`];
         const note = payload[`${cat.key}_note`];
-        if (!score || score < 1 || score > cat.max) {
-            return `Nilai ${cat.label} harus diisi 1-${cat.max}.`;
-        }
-        if (!note) {
-            return `Kegiatan/alasan untuk ${cat.label} harus diisi.`;
+        if (score || note) {
+            hasAny = true;
+            if (!score || score < 1 || score > cat.max) {
+                return `Nilai ${cat.label} harus diisi 1-${cat.max}.`;
+            }
+            if (!note) {
+                return `Kegiatan/alasan untuk ${cat.label} harus diisi.`;
+            }
         }
     }
+    if (!hasAny) {
+        return 'Isi minimal satu kategori.';
+    }
     return null;
+}
+
+function validateCategory(cat) {
+    const score = parseInt(document.getElementById(`${cat.key}-score`)?.value, 10);
+    const note = document.getElementById(`${cat.key}-note`)?.value.trim();
+    if (!score || score < 1 || score > cat.max) {
+        return `Nilai ${cat.label} harus diisi 1-${cat.max}.`;
+    }
+    if (!note) {
+        return `Kegiatan/alasan untuk ${cat.label} harus diisi.`;
+    }
+    return null;
+}
+
+function buildCategoryPayload(santriId, cat) {
+    const month = getMonthValue();
+    if (!santriId || !month) return null;
+    const score = parseInt(document.getElementById(`${cat.key}-score`)?.value, 10);
+    const note = document.getElementById(`${cat.key}-note`)?.value.trim();
+    return {
+        santri_id: santriId,
+        month: toMonthDate(month),
+        [`${cat.key}_score`]: Number.isFinite(score) ? score : null,
+        [`${cat.key}_note`]: note || null
+    };
+}
+
+function updateProgress() {
+    const total = RAPORT_CATEGORIES.length;
+    let filled = 0;
+    RAPORT_CATEGORIES.forEach(cat => {
+        const score = parseInt(document.getElementById(`${cat.key}-score`)?.value, 10);
+        const note = document.getElementById(`${cat.key}-note`)?.value.trim();
+        if (score && note) filled += 1;
+    });
+    const percent = Math.round((filled / total) * 100);
+    const bar = document.getElementById('progress-bar');
+    const text = document.getElementById('progress-text');
+    if (bar) bar.style.width = `${percent}%`;
+    if (text) text.textContent = `${filled}/${total} kategori terisi (${percent}%)`;
 }
 
 function renderKelasGrid() {
@@ -343,6 +409,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderForm(santriId, kelas);
             alert('Raport berhasil disimpan.');
         }
+    });
+
+    document.querySelectorAll('.report-save').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (currentRole !== 'admin') {
+                alert('Hanya admin yang dapat mengisi raport.');
+                return;
+            }
+            const key = btn.dataset.key;
+            const cat = RAPORT_CATEGORIES.find(item => item.key === key);
+            if (!cat) return;
+            const error = validateCategory(cat);
+            if (error) {
+                alert(error);
+                return;
+            }
+            const payload = buildCategoryPayload(santriId, cat);
+            if (!payload) {
+                alert('Lengkapi data terlebih dahulu.');
+                return;
+            }
+            const saved = await upsertRaportMental(payload);
+            if (saved) {
+                await loadReports();
+                renderForm(santriId, kelas);
+                alert('Kategori berhasil disimpan.');
+            }
+        });
     });
 
     setFormDisabled(currentRole !== 'admin');

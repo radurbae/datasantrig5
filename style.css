@@ -370,13 +370,76 @@ body {
 
 .report-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 18px;
+    gap: 14px;
 }
 
-.report-field {
+.report-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0 10px;
+}
+
+.progress-track {
+    flex: 1;
+    background: #e2e8f0;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #3b82f6, #6366f1);
+    transition: width 0.2s ease;
+}
+
+.progress-text {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.report-item {
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: #f8fafc;
+}
+
+.report-item[open] {
+    background: #ffffff;
+    box-shadow: var(--shadow);
+}
+
+.report-item summary {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.report-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.report-item-title {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.report-item-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.report-item-body {
+    margin-top: 12px;
     display: grid;
-    gap: 8px;
+    gap: 10px;
 }
 
 .report-input-row {
@@ -389,6 +452,11 @@ body {
     flex: 1;
 }
 
+.report-max {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
 .report-badge {
     min-width: 72px;
     text-align: center;
@@ -397,6 +465,22 @@ body {
     background: #e0e7ff;
     color: #3730a3;
     font-weight: 600;
+}
+
+.report-saved {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 999px;
+}
+
+.report-item-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .report-hint {
