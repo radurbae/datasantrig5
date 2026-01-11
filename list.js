@@ -50,9 +50,8 @@ async function loadData() {
         santriData.sort(sortByKelasAndAbsen);
         filteredData = [...santriData];
         currentPage = 1;
-        renderTable();
         updateFilterOptions();
-        updateStats();
+        applyDefaultStatusFilter();
     } catch (error) {
         console.error('Error loading data:', error);
         showNotification('Error memuat data: ' + error.message, 'error');
@@ -103,6 +102,14 @@ function setupEventListeners() {
             }
         });
     }
+}
+
+function applyDefaultStatusFilter() {
+    const statusSelect = document.getElementById('filter-status');
+    if (statusSelect && !statusSelect.value) {
+        statusSelect.value = 'Aktif';
+    }
+    applyFilters('');
 }
 
 // Render table
