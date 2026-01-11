@@ -27,6 +27,7 @@ let santriData = [];
 let reportData = [];
 let currentRole = 'user';
 let currentMonthValue = '';
+let viewMonthValue = '';
 
 function getMonthValue() {
     const input = document.getElementById('raport-month');
@@ -155,18 +156,18 @@ function fillForm(report) {
 function updateMonthLabel() {
     const label = document.getElementById('month-label');
     if (label) {
-        label.textContent = `Bulan: ${currentMonthValue}`;
+        label.textContent = `Bulan: ${viewMonthValue}`;
     }
 }
 
 function updateCompletionSummary() {
     const summary = document.getElementById('completion-summary');
     if (!summary) return;
-    summary.textContent = `Rekap pengisian bulan ${currentMonthValue}.`;
+    summary.textContent = `Rekap pengisian bulan ${viewMonthValue}.`;
 }
 
 async function loadReports() {
-    reportData = await getRaportMentalByMonth(toMonthDate(currentMonthValue));
+    reportData = await getRaportMentalByMonth(toMonthDate(viewMonthValue));
 }
 
 function setupMonthDefault() {
@@ -177,6 +178,36 @@ function setupMonthDefault() {
     monthInput.value = monthValue;
     monthInput.min = monthValue;
     monthInput.max = monthValue;
+}
+
+function setupViewMonthInputs() {
+    const primary = document.getElementById('raport-view-month');
+    const secondary = document.getElementById('raport-view-month-secondary');
+    const stored = localStorage.getItem('raportViewMonth');
+    viewMonthValue = stored || currentMonthValue;
+
+    [primary, secondary].forEach(input => {
+        if (!input) return;
+        input.value = viewMonthValue;
+        input.addEventListener('change', async () => {
+            viewMonthValue = input.value || currentMonthValue;
+            localStorage.setItem('raportViewMonth', viewMonthValue);
+            [primary, secondary].forEach(other => {
+                if (other) other.value = viewMonthValue;
+            });
+            await loadReports();
+            updateMonthLabel();
+            updateCompletionSummary();
+            const params = new URLSearchParams(window.location.search);
+            const kelas = params.get('kelas');
+            const santriId = params.get('santri');
+            if (!kelas) {
+                renderKelasGrid();
+            } else if (kelas && !santriId) {
+                renderSantriList(kelas);
+            }
+        });
+    });
 }
 
 function getReportPayload(santriId) {
@@ -304,7 +335,7 @@ function renderSantriList(kelas) {
 
     const filtered = santriData.filter(s => normalizeKelas(s.kelas) === kelas);
     if (title) title.textContent = `Kelas ${kelas}`;
-    if (subtitle) subtitle.textContent = `Bulan ${currentMonthValue}`;
+    if (subtitle) subtitle.textContent = `Bulan ${viewMonthValue}`;
 
     if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada data.</td></tr>';
@@ -361,7 +392,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     buildFields();
     setupMonthDefault();
     currentMonthValue = getMonthValue();
+    viewMonthValue = currentMonthValue;
     updateMonthLabel();
+    setupViewMonthInputs();
 
     santriData = await getAllSantri();
     santriData.sort(sortSantri);

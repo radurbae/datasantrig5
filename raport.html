@@ -41,8 +41,14 @@
                 <section id="raport-classes" class="report-section">
                     <div class="overview-card">
                         <div class="overview-header">
-                            <h2>Pilih Kelas</h2>
-                            <span class="overview-total" id="month-label"></span>
+                            <div>
+                                <h2>Pilih Kelas</h2>
+                                <span class="overview-total" id="month-label"></span>
+                            </div>
+                            <div class="overview-header-actions">
+                                <label for="raport-view-month" class="sr-only">Bulan</label>
+                                <input type="month" id="raport-view-month">
+                            </div>
                         </div>
                         <div id="completion-summary" class="report-summary"></div>
                         <div id="kelas-grid" class="kelas-grid"></div>
@@ -55,6 +61,10 @@
                             <div>
                                 <h2 id="kelas-title">Daftar Santri</h2>
                                 <p class="subtitle" id="kelas-subtitle"></p>
+                            </div>
+                            <div class="overview-header-actions">
+                                <label for="raport-view-month-secondary" class="sr-only">Bulan</label>
+                                <input type="month" id="raport-view-month-secondary">
                             </div>
                             <a href="raport.html" class="btn btn-secondary">← Kembali</a>
                         </div>
