@@ -18,6 +18,10 @@ function parseDateSafe(dateValue) {
     return date;
 }
 
+function formatBirthdayDate(date) {
+    return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long' });
+}
+
 function normalizeKelas(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
 }
@@ -195,6 +199,41 @@ function renderBirthdayAlert(data) {
     `).join('');
 }
 
+function renderBirthdayMonth(data) {
+    const listEl = document.getElementById('birthday-month-list');
+    const totalEl = document.getElementById('birthday-month-total');
+    if (!listEl || !totalEl) return;
+
+    const today = new Date();
+    const thisMonth = today.getMonth();
+
+    const birthdays = data.map(item => {
+        const date = parseDateSafe(item.tanggalLahir);
+        if (!date || date.getMonth() !== thisMonth) return null;
+        return {
+            name: item.nama || '-',
+            kelas: item.kelas || '-',
+            date
+        };
+    }).filter(Boolean).sort((a, b) => a.date.getDate() - b.date.getDate());
+
+    totalEl.textContent = `${birthdays.length} santri`;
+    if (birthdays.length === 0) {
+        listEl.innerHTML = '<div class="overview-empty">Tidak ada santri yang berulang tahun bulan ini.</div>';
+        return;
+    }
+
+    listEl.innerHTML = birthdays.map(item => `
+        <div class="birthday-item">
+            <div>
+                <strong>${item.name}</strong>
+                <span class="birthday-meta">Kelas: ${item.kelas}</span>
+            </div>
+            <span class="birthday-date">${formatBirthdayDate(item.date)}</span>
+        </div>
+    `).join('');
+}
+
 function setupTabs(data) {
     const tabs = document.querySelectorAll('.tab-btn');
     tabs.forEach(tab => {
@@ -217,5 +256,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await getAllSantri();
     renderStatusSummary(data);
     renderBirthdayAlert(data);
+    renderBirthdayMonth(data);
     setupTabs(data);
 });

@@ -321,6 +321,11 @@ body {
     color: #9a3412;
 }
 
+.birthday-date {
+    font-weight: 700;
+    color: #0f766e;
+}
+
 /* Raport */
 .report-filter-grid {
     display: grid;
