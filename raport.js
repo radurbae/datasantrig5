@@ -96,10 +96,12 @@ function buildFields() {
             </summary>
             <div class="report-item-body">
                 <div class="report-input-row">
+                    <label class="report-field-label" for="${cat.key}-score">Skor</label>
                     <input type="number" id="${cat.key}-score" min="1" max="${cat.max}" placeholder="1-${cat.max}">
                     <span class="report-max">Maks ${cat.max}</span>
                 </div>
-                <textarea id="${cat.key}-note" rows="3" placeholder="Kegiatan/alasan penilaian"></textarea>
+                <label class="report-field-label" for="${cat.key}-note">Alasan/Kegiatan</label>
+                <textarea id="${cat.key}-note" rows="3" placeholder="Tuliskan alasan penilaian atau kegiatan yang menunjukkan skor ini"></textarea>
                 <div class="report-item-actions">
                     <small class="report-hint">Kategori otomatis</small>
                     <button type="button" class="btn btn-secondary report-save" data-key="${cat.key}">Simpan Kategori</button>
