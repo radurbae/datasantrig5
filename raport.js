@@ -26,6 +26,7 @@ const CATEGORY_RULES = {
 let santriData = [];
 let reportData = [];
 let currentRole = 'user';
+let currentMonthValue = '';
 
 function getMonthValue() {
     const input = document.getElementById('raport-month');
@@ -123,96 +124,21 @@ function fillForm(report) {
     });
 }
 
-function updateSantriSelect() {
-    const kelasFilter = document.getElementById('filter-kelas')?.value || '';
-    const santriSelect = document.getElementById('santri-select');
-    if (!santriSelect) return;
-
-    const filtered = kelasFilter
-        ? santriData.filter(s => normalizeKelas(s.kelas) === kelasFilter)
-        : santriData;
-
-    santriSelect.innerHTML = '<option value="">Pilih Santri</option>' + filtered.map(s => `
-        <option value="${s.id}">${s.nama} (${normalizeKelas(s.kelas) || '-'})</option>
-    `).join('');
-}
-
-function updateKelasOptions() {
-    const kelasSelect = document.getElementById('filter-kelas');
-    if (!kelasSelect) return;
-    const kelasList = [...new Set(santriData.map(s => normalizeKelas(s.kelas)).filter(Boolean))];
-    kelasList.sort((a, b) => {
-        const aKey = parseKelasKey(a);
-        const bKey = parseKelasKey(b);
-        if (aKey.num !== bKey.num) return aKey.num - bKey.num;
-        return aKey.suffix.localeCompare(bKey.suffix, 'id');
-    });
-    kelasSelect.innerHTML = '<option value="">Semua Kelas</option>' +
-        kelasList.map(k => `<option value="${k}">${k}</option>`).join('');
+function updateMonthLabel() {
+    const label = document.getElementById('month-label');
+    if (label) {
+        label.textContent = `Bulan: ${currentMonthValue}`;
+    }
 }
 
 function updateCompletionSummary() {
     const summary = document.getElementById('completion-summary');
-    const kelasFilter = document.getElementById('filter-kelas')?.value || '';
     if (!summary) return;
-
-    const month = getMonthValue();
-    if (!month) {
-        summary.textContent = 'Pilih bulan untuk melihat rekap.';
-        return;
-    }
-
-    const filteredSantri = kelasFilter
-        ? santriData.filter(s => normalizeKelas(s.kelas) === kelasFilter)
-        : santriData;
-
-    const total = filteredSantri.length;
-    const filledIds = new Set(reportData.map(r => r.santri_id));
-    const filled = filteredSantri.filter(s => filledIds.has(s.id)).length;
-    const percent = total ? Math.round((filled / total) * 100) : 0;
-
-    summary.textContent = `Terisi ${filled} dari ${total} santri (${percent}%)`;
-}
-
-function renderStatusTable() {
-    const tbody = document.getElementById('report-tbody');
-    if (!tbody) return;
-    const kelasFilter = document.getElementById('filter-kelas')?.value || '';
-    const filteredSantri = kelasFilter
-        ? santriData.filter(s => normalizeKelas(s.kelas) === kelasFilter)
-        : santriData;
-
-    if (filteredSantri.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada data.</td></tr>';
-        return;
-    }
-
-    const filledIds = new Set(reportData.map(r => r.santri_id));
-    tbody.innerHTML = filteredSantri.map((s, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${s.nama}</td>
-            <td>${normalizeKelas(s.kelas) || '-'}</td>
-            <td>
-                <span class="status-pill ${filledIds.has(s.id) ? 'status-done' : 'status-pending'}">
-                    ${filledIds.has(s.id) ? 'Sudah' : 'Belum'}
-                </span>
-            </td>
-        </tr>
-    `).join('');
+    summary.textContent = `Rekap pengisian bulan ${currentMonthValue}.`;
 }
 
 async function loadReports() {
-    const month = getMonthValue();
-    if (!month) {
-        reportData = [];
-        updateCompletionSummary();
-        renderStatusTable();
-        return;
-    }
-    reportData = await getRaportMentalByMonth(toMonthDate(month));
-    updateCompletionSummary();
-    renderStatusTable();
+    reportData = await getRaportMentalByMonth(toMonthDate(currentMonthValue));
 }
 
 function setupMonthDefault() {
@@ -221,10 +147,11 @@ function setupMonthDefault() {
     const now = new Date();
     const monthValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     monthInput.value = monthValue;
+    monthInput.min = monthValue;
+    monthInput.max = monthValue;
 }
 
-function getReportPayload() {
-    const santriId = document.getElementById('santri-select')?.value;
+function getReportPayload(santriId) {
     const month = getMonthValue();
     if (!santriId || !month) return null;
 
@@ -257,19 +184,98 @@ function validatePayload(payload) {
     return null;
 }
 
-async function handleSantriChange() {
-    const santriId = document.getElementById('santri-select')?.value;
-    if (!santriId) {
-        fillForm(null);
+function renderKelasGrid() {
+    const grid = document.getElementById('kelas-grid');
+    if (!grid) return;
+    if (santriData.length === 0) {
+        grid.innerHTML = '<div class="overview-empty">Belum ada data santri.</div>';
         return;
     }
-    const month = getMonthValue();
-    if (!month) return;
+    const kelasGroups = {};
+    santriData.forEach(s => {
+        const kelas = normalizeKelas(s.kelas) || 'Tidak diketahui';
+        if (!kelasGroups[kelas]) kelasGroups[kelas] = [];
+        kelasGroups[kelas].push(s);
+    });
+
+    const kelasList = Object.keys(kelasGroups).sort((a, b) => {
+        const aKey = parseKelasKey(a);
+        const bKey = parseKelasKey(b);
+        if (aKey.num !== bKey.num) return aKey.num - bKey.num;
+        return aKey.suffix.localeCompare(bKey.suffix, 'id');
+    });
+
+    const filledIds = new Set(reportData.map(r => r.santri_id));
+    grid.innerHTML = kelasList.map(kelas => {
+        const total = kelasGroups[kelas].length;
+        const filled = kelasGroups[kelas].filter(s => filledIds.has(s.id)).length;
+        const percent = total ? Math.round((filled / total) * 100) : 0;
+        return `
+            <a class="kelas-card" href="raport.html?kelas=${encodeURIComponent(kelas)}">
+                <div class="kelas-card-title">${kelas}</div>
+                <div class="kelas-card-meta">${filled} / ${total} santri</div>
+                <div class="kelas-card-percent">${percent}%</div>
+            </a>
+        `;
+    }).join('');
+}
+
+function renderSantriList(kelas) {
+    const section = document.getElementById('raport-santri');
+    const tbody = document.getElementById('santri-tbody');
+    const title = document.getElementById('kelas-title');
+    const subtitle = document.getElementById('kelas-subtitle');
+    if (!section || !tbody) return;
+
+    const filtered = santriData.filter(s => normalizeKelas(s.kelas) === kelas);
+    if (title) title.textContent = `Kelas ${kelas}`;
+    if (subtitle) subtitle.textContent = `Bulan ${currentMonthValue}`;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada data.</td></tr>';
+        return;
+    }
+    const filledIds = new Set(reportData.map(r => r.santri_id));
+    tbody.innerHTML = filtered.map((s, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${s.nama}</td>
+            <td>${s.noAbsen ?? '-'}</td>
+            <td>
+                <span class="status-pill ${filledIds.has(s.id) ? 'status-done' : 'status-pending'}">
+                    ${filledIds.has(s.id) ? 'Sudah' : 'Belum'}
+                </span>
+            </td>
+            <td>
+                <a class="btn btn-secondary" href="raport.html?kelas=${encodeURIComponent(kelas)}&santri=${s.id}">
+                    ${filledIds.has(s.id) ? 'Edit' : 'Input'}
+                </a>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderForm(santriId, kelas) {
+    const santri = santriData.find(s => s.id === santriId);
+    const title = document.getElementById('santri-title');
+    const subtitle = document.getElementById('santri-subtitle');
+    if (title) title.textContent = santri ? `Raport ${santri.nama}` : 'Form Raport Mental';
+    if (subtitle) subtitle.textContent = santri ? `Kelas ${normalizeKelas(santri.kelas)} • Bulan ${currentMonthValue}` : '';
+
     const existing = reportData.find(r => r.santri_id === santriId);
     fillForm(existing || null);
     const modeEl = document.getElementById('report-mode');
     if (modeEl) {
         modeEl.textContent = existing ? 'Mode: Edit' : 'Mode: Input';
+    }
+
+    const monthInput = document.getElementById('raport-month');
+    const lock = document.getElementById('month-lock');
+    if (monthInput) {
+        monthInput.value = currentMonthValue;
+    }
+    if (lock) {
+        lock.textContent = 'Input hanya untuk bulan berjalan.';
     }
 }
 
@@ -279,27 +285,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     buildFields();
     setupMonthDefault();
+    currentMonthValue = getMonthValue();
+    updateMonthLabel();
 
     santriData = await getAllSantri();
     santriData.sort(sortSantri);
-    updateKelasOptions();
-    updateSantriSelect();
     await loadReports();
     updateCompletionSummary();
 
-    document.getElementById('raport-month')?.addEventListener('change', async () => {
-        await loadReports();
-        handleSantriChange();
-    });
+    const params = new URLSearchParams(window.location.search);
+    const kelas = params.get('kelas');
+    const santriId = params.get('santri');
 
-    document.getElementById('filter-kelas')?.addEventListener('change', () => {
-        updateSantriSelect();
-        updateCompletionSummary();
-        renderStatusTable();
-        handleSantriChange();
-    });
-
-    document.getElementById('santri-select')?.addEventListener('change', handleSantriChange);
+    if (!kelas) {
+        renderKelasGrid();
+    } else if (kelas && !santriId) {
+        document.getElementById('raport-classes').style.display = 'none';
+        document.getElementById('raport-santri').style.display = 'block';
+        renderSantriList(kelas);
+    } else {
+        document.getElementById('raport-classes').style.display = 'none';
+        document.getElementById('raport-form-section').style.display = 'block';
+        renderForm(santriId, kelas);
+    }
 
     const form = document.getElementById('raport-form');
     form?.addEventListener('submit', async (e) => {
@@ -311,9 +319,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const confirmed = confirm('Apakah Data Sudah Benar?');
         if (!confirmed) return;
 
-        const payload = getReportPayload();
+        const payload = getReportPayload(santriId);
         if (!payload) {
-            alert('Pilih santri dan bulan terlebih dahulu.');
+            alert('Lengkapi data terlebih dahulu.');
             return;
         }
         const error = validatePayload(payload);
@@ -332,7 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (saved) {
             await loadReports();
-            handleSantriChange();
+            renderForm(santriId, kelas);
             alert('Raport berhasil disimpan.');
         }
     });

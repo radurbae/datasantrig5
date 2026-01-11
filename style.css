@@ -403,6 +403,46 @@ body {
     color: var(--text-secondary);
 }
 
+.kelas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.kelas-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px;
+    text-decoration: none;
+    color: var(--text-primary);
+    display: grid;
+    gap: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kelas-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.kelas-card-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.kelas-card-meta {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.kelas-card-percent {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
 @media (max-width: 900px) {
     .app-shell {
         flex-direction: column;

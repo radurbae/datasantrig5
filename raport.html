@@ -38,34 +38,25 @@
                     <p class="subtitle">Input nilai kepribadian bulanan per santri</p>
                 </header>
 
-                <section class="report-filter">
+                <section id="raport-classes" class="report-section">
                     <div class="overview-card">
-                        <div class="report-filter-grid">
-                            <div class="form-group">
-                                <label for="raport-month">Bulan Penilaian</label>
-                                <input type="month" id="raport-month" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="filter-kelas">Kelas</label>
-                                <select id="filter-kelas">
-                                    <option value="">Semua Kelas</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="santri-select">Nama Santri</label>
-                                <select id="santri-select" required>
-                                    <option value="">Pilih Santri</option>
-                                </select>
-                            </div>
+                        <div class="overview-header">
+                            <h2>Pilih Kelas</h2>
+                            <span class="overview-total" id="month-label"></span>
                         </div>
                         <div id="completion-summary" class="report-summary"></div>
+                        <div id="kelas-grid" class="kelas-grid"></div>
                     </div>
                 </section>
 
-                <section class="report-status">
+                <section id="raport-santri" class="report-section" style="display: none;">
                     <div class="overview-card">
                         <div class="overview-header">
-                            <h2>Status Pengisian Bulan Ini</h2>
+                            <div>
+                                <h2 id="kelas-title">Daftar Santri</h2>
+                                <p class="subtitle" id="kelas-subtitle"></p>
+                            </div>
+                            <a href="raport.html" class="btn btn-secondary">← Kembali</a>
                         </div>
                         <div class="table-container">
                             <table class="report-table">
@@ -73,13 +64,14 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Nama</th>
-                                        <th>Kelas</th>
+                                        <th>No Absen</th>
                                         <th>Status</th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="report-tbody">
+                                <tbody id="santri-tbody">
                                     <tr>
-                                        <td colspan="4" class="empty-state">Belum ada data.</td>
+                                        <td colspan="5" class="empty-state">Belum ada data.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -87,11 +79,25 @@
                     </div>
                 </section>
 
-                <section class="report-form-section">
+                <section id="raport-form-section" class="report-section" style="display: none;">
                     <div class="overview-card">
                         <div class="overview-header">
-                            <h2>Form Raport Mental</h2>
-                            <span id="report-mode" class="overview-total"></span>
+                            <div>
+                                <h2 id="santri-title">Form Raport Mental</h2>
+                                <p class="subtitle" id="santri-subtitle"></p>
+                            </div>
+                            <a href="raport.html" class="btn btn-secondary">← Kembali</a>
+                        </div>
+                        <div class="report-filter-grid">
+                            <div class="form-group">
+                                <label for="raport-month">Bulan Penilaian</label>
+                                <input type="month" id="raport-month" required>
+                                <small id="month-lock" class="report-hint"></small>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <div id="report-mode" class="overview-total"></div>
+                            </div>
                         </div>
                         <form id="raport-form" class="report-form">
                             <div id="report-fields" class="report-grid"></div>
