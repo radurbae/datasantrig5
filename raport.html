@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List Data Santri - Database Santri PMDG Kampus 5 Darul Qiyam</title>
+    <title>Raport Mental - Database Santri PMDG Kampus 5 Darul Qiyam</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Supabase JS Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -24,8 +23,8 @@
             <nav class="sidebar-nav">
                 <a href="overview.html" class="sidebar-link">📊 Overview</a>
                 <a href="form.html" class="sidebar-link" data-admin-only>➕ Input Data</a>
-                <a href="list.html" class="sidebar-link active">📋 List Data</a>
-                <a href="raport.html" class="sidebar-link">📝 Raport Mental</a>
+                <a href="list.html" class="sidebar-link">📋 List Data</a>
+                <a href="raport.html" class="sidebar-link active">📝 Raport Mental</a>
             </nav>
             <div class="sidebar-footer">
                 <span class="nav-role" data-role-label></span>
@@ -35,74 +34,80 @@
         <main class="main-content">
             <div class="content-wrap">
                 <header class="page-header">
-                    <h1>Daftar Santri</h1>
-                    <p class="subtitle">Lihat dan kelola data santri</p>
+                    <h1>Raport Mental Santri</h1>
+                    <p class="subtitle">Input nilai kepribadian bulanan per santri</p>
                 </header>
 
-                <!-- Search and Filter Section -->
-                <section class="search-section">
-                    <div class="search-card">
-                        <div class="search-row">
-                            <div class="search-group">
-                                <input type="text" id="search-input" placeholder="🔍 Cari santri (nama, kelas, daerah, konsulat...)" class="search-input">
+                <section class="report-filter">
+                    <div class="overview-card">
+                        <div class="report-filter-grid">
+                            <div class="form-group">
+                                <label for="raport-month">Bulan Penilaian</label>
+                                <input type="month" id="raport-month" required>
                             </div>
-                            <div class="filter-group">
-                                <select id="filter-kelas" class="filter-select">
+                            <div class="form-group">
+                                <label for="filter-kelas">Kelas</label>
+                                <select id="filter-kelas">
                                     <option value="">Semua Kelas</option>
                                 </select>
-                                <select id="filter-daerah" class="filter-select">
-                                    <option value="">Semua Daerah</option>
-                                </select>
-                                <select id="filter-status" class="filter-select">
-                                    <option value="">Semua Status</option>
-                                    <option value="Aktif">Aktif</option>
-                                    <option value="Mengundurkan Diri">Mengundurkan Diri</option>
-                                    <option value="Istirahat">Istirahat</option>
-                                    <option value="Skorsing">Skorsing</option>
-                                    <option value="Pindah Kampus">Pindah Kampus</option>
-                                    <option value="Dikeluarkan">Dikeluarkan</option>
+                            </div>
+                            <div class="form-group">
+                                <label for="santri-select">Nama Santri</label>
+                                <select id="santri-select" required>
+                                    <option value="">Pilih Santri</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="stats">
-                            <span id="total-count">Total: 0 santri</span>
-                        </div>
+                        <div id="completion-summary" class="report-summary"></div>
                     </div>
                 </section>
 
-                <!-- Data Table Section -->
-                <section class="table-section">
-                    <div class="table-card">
-                        <h2>Daftar Santri</h2>
+                <section class="report-status">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Status Pengisian Bulan Ini</h2>
+                        </div>
                         <div class="table-container">
-                            <table id="santri-table">
+                            <table class="report-table">
                                 <thead>
                                     <tr>
                                         <th>No</th>
                                         <th>Nama</th>
                                         <th>Kelas</th>
-                                        <th>Daerah</th>
                                         <th>Status</th>
-                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="santri-tbody">
+                                <tbody id="report-tbody">
                                     <tr>
-                                        <td colspan="6" class="empty-state">Belum ada data santri. Silakan tambah data baru.</td>
+                                        <td colspan="4" class="empty-state">Belum ada data.</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </section>
+
+                <section class="report-form-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Form Raport Mental</h2>
+                            <span id="report-mode" class="overview-total"></span>
+                        </div>
+                        <form id="raport-form" class="report-form">
+                            <div id="report-fields" class="report-grid"></div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="raport-submit">Simpan Raport</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 
-    <!-- Load scripts in order -->
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="db.js"></script>
-    <script src="list.js"></script>
+    <script src="raport.js"></script>
 </body>
 </html>

@@ -187,6 +187,92 @@ USING (
 
 ### 6. Setup Row Level Security (Opsional)
 
+## 🧠 Raport Mental Santri
+
+Tambahkan tabel raport mental dengan SQL berikut:
+
+```sql
+CREATE TABLE IF NOT EXISTS raport_mental (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  santri_id UUID REFERENCES santri(id) ON DELETE CASCADE NOT NULL,
+  month DATE NOT NULL,
+  kepondokmodernan_score INTEGER,
+  kepondokmodernan_note TEXT,
+  dedikasi_score INTEGER,
+  dedikasi_note TEXT,
+  kedewasaan_score INTEGER,
+  kedewasaan_note TEXT,
+  inisiatif_score INTEGER,
+  inisiatif_note TEXT,
+  komunikasi_score INTEGER,
+  komunikasi_note TEXT,
+  daya_tanggap_score INTEGER,
+  daya_tanggap_note TEXT,
+  ketaatan_score INTEGER,
+  ketaatan_note TEXT,
+  bacaan_quran_score INTEGER,
+  bacaan_quran_note TEXT,
+  kepemimpinan_score INTEGER,
+  kepemimpinan_note TEXT,
+  motivasi_score INTEGER,
+  motivasi_note TEXT,
+  kesehatan_score INTEGER,
+  kesehatan_note TEXT,
+  disiplin_score INTEGER,
+  disiplin_note TEXT,
+  ibadah_score INTEGER,
+  ibadah_note TEXT,
+  sopan_santun_score INTEGER,
+  sopan_santun_note TEXT,
+  kesegeraan_score INTEGER,
+  kesegeraan_note TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS raport_mental_unique
+ON raport_mental (santri_id, month);
+```
+
+Tambahkan policy RLS untuk tabel `raport_mental`:
+
+```sql
+ALTER TABLE raport_mental ENABLE ROW LEVEL SECURITY;
+
+-- Semua user login boleh lihat
+CREATE POLICY "Raport viewable by authenticated users"
+ON raport_mental FOR SELECT
+USING (auth.role() = 'authenticated');
+
+-- Hanya admin boleh insert/update/delete
+CREATE POLICY "Admins can insert raport"
+ON raport_mental FOR INSERT
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins can update raport"
+ON raport_mental FOR UPDATE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins can delete raport"
+ON raport_mental FOR DELETE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+```
+
 Jika Anda ingin mengaktifkan Row Level Security (RLS) untuk keamanan:
 
 1. Di SQL Editor, uncomment bagian policy di SQL query di atas

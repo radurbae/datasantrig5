@@ -19,6 +19,48 @@ function getSupabaseClient() {
     return null;
 }
 
+async function getRaportMentalByMonth(monthDate) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('raport_mental')
+            .select('*')
+            .eq('month', monthDate);
+        if (error) {
+            console.error('Error fetching raport mental:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getRaportMentalByMonth:', error);
+        return [];
+    }
+}
+
+async function upsertRaportMental(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('raport_mental')
+            .upsert(payload, { onConflict: 'santri_id,month' })
+            .select()
+            .single();
+        if (error) {
+            console.error('Error saving raport mental:', error);
+            if (typeof showNotification !== 'undefined') {
+                showNotification('Error menyimpan raport: ' + error.message, 'error');
+            }
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in upsertRaportMental:', error);
+        return null;
+    }
+}
+
 /**
  * Get all santri data from Supabase
  * @returns {Promise<Array>} Array of santri data (converted to camelCase)
