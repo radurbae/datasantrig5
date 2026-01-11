@@ -207,10 +207,10 @@ function renderBirthdayMonth(data) {
     const today = new Date();
     const thisMonth = today.getMonth();
 
-    const birthdays = data.map(item => {
+    const birthdays = data.filter(item => item.status === 'Aktif').map(item => {
         const date = parseDateSafe(item.tanggalLahir);
         if (!date || date.getMonth() !== thisMonth) return null;
-        if (date.getDate() < today.getDate()) return null;
+        if (date.getDate() <= today.getDate()) return null;
         return {
             name: item.nama || '-',
             kelas: item.kelas || '-',
