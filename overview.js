@@ -210,6 +210,7 @@ function renderBirthdayMonth(data) {
     const birthdays = data.map(item => {
         const date = parseDateSafe(item.tanggalLahir);
         if (!date || date.getMonth() !== thisMonth) return null;
+        if (date.getDate() < today.getDate()) return null;
         return {
             name: item.nama || '-',
             kelas: item.kelas || '-',
