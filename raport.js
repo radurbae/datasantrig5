@@ -62,6 +62,15 @@ function sortSantri(a, b) {
     return (a.nama || '').localeCompare(b.nama || '', 'id');
 }
 
+function isReportComplete(report) {
+    if (!report) return false;
+    return RAPORT_CATEGORIES.every(cat => {
+        const score = report[`${cat.key}_score`];
+        const note = report[`${cat.key}_note`];
+        return score && note;
+    });
+}
+
 function getCategoryLabel(max, value) {
     if (!value) return '-';
     const rule = CATEGORY_RULES[max];
@@ -271,15 +280,15 @@ function renderKelasGrid() {
         return aKey.suffix.localeCompare(bKey.suffix, 'id');
     });
 
-    const filledIds = new Set(reportData.map(r => r.santri_id));
+    const completeIds = new Set(reportData.filter(isReportComplete).map(r => r.santri_id));
     grid.innerHTML = kelasList.map(kelas => {
         const total = kelasGroups[kelas].length;
-        const filled = kelasGroups[kelas].filter(s => filledIds.has(s.id)).length;
-        const percent = total ? Math.round((filled / total) * 100) : 0;
+        const completed = kelasGroups[kelas].filter(s => completeIds.has(s.id)).length;
+        const percent = total ? Math.round((completed / total) * 100) : 0;
         return `
             <a class="kelas-card" href="raport.html?kelas=${encodeURIComponent(kelas)}">
                 <div class="kelas-card-title">${kelas}</div>
-                <div class="kelas-card-meta">${filled} / ${total} santri</div>
+                <div class="kelas-card-meta">${completed} / ${total} santri</div>
                 <div class="kelas-card-percent">${percent}%</div>
             </a>
         `;
@@ -301,20 +310,20 @@ function renderSantriList(kelas) {
         tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada data.</td></tr>';
         return;
     }
-    const filledIds = new Set(reportData.map(r => r.santri_id));
+    const reportMap = new Map(reportData.map(r => [r.santri_id, r]));
     tbody.innerHTML = filtered.map((s, index) => `
         <tr>
             <td>${index + 1}</td>
             <td>${s.nama}</td>
             <td>${s.noAbsen ?? '-'}</td>
             <td>
-                <span class="status-pill ${filledIds.has(s.id) ? 'status-done' : 'status-pending'}">
-                    ${filledIds.has(s.id) ? 'Sudah' : 'Belum'}
+                <span class="status-pill ${isReportComplete(reportMap.get(s.id)) ? 'status-done' : 'status-pending'}">
+                    ${isReportComplete(reportMap.get(s.id)) ? 'Sudah' : 'Belum'}
                 </span>
             </td>
             <td>
                 <a class="btn btn-secondary" href="raport.html?kelas=${encodeURIComponent(kelas)}&santri=${s.id}">
-                    ${filledIds.has(s.id) ? 'Edit' : 'Input'}
+                    ${reportMap.get(s.id) ? 'Edit' : 'Input'}
                 </a>
             </td>
         </tr>
