@@ -6,8 +6,58 @@ const ITEMS_PER_PAGE = 20;
 let labelToIdMap = new Map();
 let idToLabelMap = new Map();
 
+const OPPM_ROLE_OPTIONS = ['Ketua', 'Sekretaris', 'Bendahara', 'Anggota'];
+
 const SUBCATEGORY_MAP = {
-    OPPM: ['Bagian', 'Rayon', 'Klub', 'Kursus'],
+    OPPM: [
+        'Bagian - Ketua OPPM',
+        'Bagian - Sekretaris Pusat',
+        'Bagian - Bendahara Pusat',
+        'Bagian - Keamanan',
+        'Bagian - Pengajaran',
+        'Bagian - Ta\'mir Masjid',
+        'Bagian - Penggerak Bahasa',
+        'Bagian - Olahraga',
+        'Bagian - Penerangan',
+        'Bagian - Koperasi Pelajar',
+        'Bagian - Koperasi Warung Pelajar',
+        'Bagian - Koperasi Dapur',
+        'Bagian - Penatu',
+        'Bagian - Kesenian',
+        'Bagian - Keterampilan',
+        'Bagian - Kesehatan',
+        'Bagian - Bersih Lingkungan',
+        'Bagian - Pertamanan',
+        'Bagian - Fotografi',
+        'Bagian - Penerimaan Tamu',
+        'Bagian - Perpustakaan',
+        'Rayon - Ghaza 1',
+        'Rayon - Ghaza 2',
+        'Rayon - Santiniketan',
+        'Rayon - Syanggit',
+        'Rayon - Mekkah',
+        'Rayon - Mesir',
+        'Rayon - Riyadh',
+        'Klub - Samba FC',
+        'Klub - Etihad FC',
+        'Klub - Soccer FC',
+        'Klub - Bima FC',
+        'Klub - Eternal FAC',
+        'Klub - Forious FAC',
+        'Klub - Emirates FAC',
+        'Klub - Libero FAC',
+        'Klub - Boeing BBC',
+        'Klub - Pioneer BBC',
+        'Klub - D\'Legend BC',
+        'Klub - Blaze VBC',
+        'Kursus - Gastrada',
+        'Kursus - Art Gallery',
+        'Kursus - X-Tidaq',
+        'Kursus - Alshodaq',
+        'Kursus - Vodcom',
+        'Kursus - Markaz Khot',
+        'Kursus - MBBND'
+    ],
     KGGP: ['Bagian', 'POT', 'Kontingen'],
     Instansi: ['ITQAN', 'FP2WS', 'JMQ', 'JMH', 'DQPOS', 'LAB KMI'],
     Kepanitiaan: ['Panitia 1', 'Panitia 2', 'Panitia 3']
@@ -119,6 +169,47 @@ function populateSubcategory(category) {
         options.map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('');
 }
 
+function updateKeteranganField(category) {
+    const textInput = document.getElementById('catatan-keterangan-text');
+    const selectInput = document.getElementById('catatan-keterangan-select');
+    if (!textInput || !selectInput) return;
+
+    if (category === 'OPPM') {
+        textInput.style.display = 'none';
+        selectInput.style.display = 'block';
+        textInput.value = '';
+    } else {
+        selectInput.style.display = 'none';
+        textInput.style.display = 'block';
+        selectInput.value = '';
+    }
+}
+
+function getKeteranganValue(category) {
+    if (category === 'OPPM') {
+        return document.getElementById('catatan-keterangan-select').value;
+    }
+    return document.getElementById('catatan-keterangan-text').value.trim();
+}
+
+function setKeteranganValue(category, value) {
+    const textInput = document.getElementById('catatan-keterangan-text');
+    const selectInput = document.getElementById('catatan-keterangan-select');
+    if (category === 'OPPM') {
+        updateKeteranganField('OPPM');
+        if (OPPM_ROLE_OPTIONS.includes(value)) {
+            selectInput.value = value;
+        } else {
+            selectInput.value = '';
+        }
+        textInput.value = '';
+    } else {
+        updateKeteranganField(category);
+        textInput.value = value || '';
+        selectInput.value = '';
+    }
+}
+
 function resetForm() {
     editingId = null;
     document.getElementById('catatan-form').reset();
@@ -127,6 +218,7 @@ function resetForm() {
     document.getElementById('catatan-cancel').style.display = 'none';
     document.getElementById('catatan-submit').textContent = 'Simpan';
     populateSubcategory('');
+    updateKeteranganField('');
     const hidden = document.getElementById('catatan-santri');
     if (hidden) hidden.value = '';
 }
@@ -237,17 +329,15 @@ async function loadData() {
     updateKelasFilter();
     renderSantriTable();
     populateSubcategory(document.getElementById('catatan-kategori').value);
+    updateKeteranganField(document.getElementById('catatan-kategori').value);
 }
 
 function setFormFromItem(item) {
     editingId = item.id;
-    const label = idToLabelMap.get(item.santri_id) || '';
-    document.getElementById('catatan-santri-input').value = label;
-    document.getElementById('catatan-santri').value = item.santri_id;
     document.getElementById('catatan-kategori').value = item.kategori || '';
     populateSubcategory(item.kategori);
     document.getElementById('catatan-subkategori').value = item.sub_kategori || '';
-    document.getElementById('catatan-keterangan').value = item.keterangan || '';
+    setKeteranganValue(item.kategori, item.keterangan || '');
     document.getElementById('catatan-tahun').value = item.tahun_ajaran || getHijriAcademicYear();
     document.getElementById('catatan-mode').textContent = 'Mode: Edit';
     document.getElementById('catatan-cancel').style.display = 'inline-flex';
@@ -291,6 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('catatan-cancel').addEventListener('click', resetForm);
     document.getElementById('catatan-kategori').addEventListener('change', (e) => {
         populateSubcategory(e.target.value);
+        updateKeteranganField(e.target.value);
     });
     document.getElementById('catatan-santri-input').addEventListener('input', () => {
         const hidden = document.getElementById('catatan-santri');
@@ -304,11 +395,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (role !== 'admin') return;
 
         resolveSantriInput();
+        const kategori = document.getElementById('catatan-kategori').value;
         const payload = {
             santri_id: document.getElementById('catatan-santri').value,
-            kategori: document.getElementById('catatan-kategori').value,
+            kategori,
             sub_kategori: document.getElementById('catatan-subkategori').value,
-            keterangan: document.getElementById('catatan-keterangan').value.trim(),
+            keterangan: getKeteranganValue(kategori),
             tahun_ajaran: document.getElementById('catatan-tahun').value.trim()
         };
 
