@@ -81,6 +81,24 @@ function isReportComplete(report) {
     });
 }
 
+function getCategoryStatus(max, value) {
+    if (!value) return '';
+    const rule = CATEGORY_RULES[max];
+    if (!rule) return '';
+    if (value >= rule.baik[0] && value <= rule.baik[1]) return 'Baik';
+    if (value >= rule.sedang[0] && value <= rule.sedang[1]) return 'Sedang';
+    if (value >= rule.kurang[0] && value <= rule.kurang[1]) return 'Kurang';
+    return '';
+}
+
+function getTotalPredicate(total) {
+    if (!total) return '';
+    if (total >= 351 && total <= 500) return 'Baik';
+    if (total >= 151 && total <= 350) return 'Sedang';
+    if (total >= 1 && total <= 150) return 'Kurang';
+    return '';
+}
+
 function exportToExcel(rows, filename) {
     const header = [
         'No',
@@ -89,7 +107,13 @@ function exportToExcel(rows, filename) {
         'No Absen',
         'Bulan',
         'Status Raport',
-        ...RAPORT_CATEGORIES.flatMap(cat => [`${cat.label} (Skor)`, `${cat.label} (Alasan)`])
+        'Total Poin',
+        'Predikat Total',
+        ...RAPORT_CATEGORIES.flatMap(cat => [
+            `${cat.label} (Skor)`,
+            `${cat.label} (Alasan)`,
+            `${cat.label} (Predikat)`
+        ])
     ];
 
     const tableRows = [
@@ -122,17 +146,31 @@ function buildExportRows(targetSantri) {
     return targetSantri.map((s, index) => {
         const report = reportMap.get(s.id);
         const status = isReportComplete(report) ? 'Sudah' : 'Belum';
+        let totalPoints = 0;
+        RAPORT_CATEGORIES.forEach(cat => {
+            const value = report ? report[`${cat.key}_score`] : null;
+            if (typeof value === 'number') {
+                totalPoints += value;
+            }
+        });
+        const totalPredicate = getTotalPredicate(totalPoints);
         const cells = [
             index + 1,
             s.nama || '-',
             normalizeKelas(s.kelas) || '-',
             s.noAbsen ?? '-',
             viewMonthValue,
-            status
+            status,
+            totalPoints || '',
+            totalPredicate
         ];
         RAPORT_CATEGORIES.forEach(cat => {
-            cells.push(report ? report[`${cat.key}_score`] ?? '' : '');
-            cells.push(report ? report[`${cat.key}_note`] ?? '' : '');
+            const score = report ? report[`${cat.key}_score`] ?? '' : '';
+            const note = report ? report[`${cat.key}_note`] ?? '' : '';
+            const predikat = score ? getCategoryStatus(cat.max, score) : '';
+            cells.push(score);
+            cells.push(note);
+            cells.push(predikat);
         });
         return cells;
     });
