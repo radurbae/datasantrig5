@@ -461,6 +461,9 @@ function renderSantriList(kelas) {
             }
         });
         const totalPredicate = getTotalPredicate(totalPoints);
+        const predikatClass = totalPredicate
+            ? `predikat-pill predikat-${totalPredicate.toLowerCase()}`
+            : 'predikat-pill';
         const statusText = isReportComplete(report) ? 'Sudah' : 'Belum';
         const statusClass = isReportComplete(report) ? 'status-done' : 'status-pending';
         return `
