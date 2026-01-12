@@ -1,7 +1,12 @@
 let santriId = null;
 let santriData = null;
 let prestasiData = [];
+let prestasiCategories = [];
+let prestasiKeteranganOptions = [];
 let editingId = null;
+
+const FALLBACK_PRESTASI_CATEGORIES = ['OPPM', 'KGGP', 'Instansi', 'KMI', 'Antar Kampus'];
+const FALLBACK_PRESTASI_KETERANGAN = ['Juara 1', 'Juara 2', 'Juara 3', 'Harapan 1', 'Harapan 2', 'Harapan 3', 'Pengikut'];
 
 function statusClassName(status) {
     return (status || '').toLowerCase().replace(/\s+/g, '-');
@@ -39,6 +44,37 @@ function getHijriAcademicYear() {
     }
     const year = new Date().getFullYear();
     return `${year}-${year + 1}`;
+}
+
+async function loadMasterData() {
+    const categories = await getPrestasiCategories();
+    const keterangan = await getPrestasiKeteranganOptions();
+
+    prestasiCategories = categories.length ? categories.map(item => item.name) : FALLBACK_PRESTASI_CATEGORIES;
+    prestasiKeteranganOptions = keterangan.length ? keterangan.map(item => item.label) : FALLBACK_PRESTASI_KETERANGAN;
+}
+
+function populatePrestasiSelects() {
+    const kategoriSelect = document.getElementById('prestasi-kategori');
+    const keteranganSelect = document.getElementById('prestasi-keterangan');
+
+    if (kategoriSelect) {
+        const current = kategoriSelect.value;
+        kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>' +
+            prestasiCategories.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+        if (current && prestasiCategories.includes(current)) {
+            kategoriSelect.value = current;
+        }
+    }
+
+    if (keteranganSelect) {
+        const current = keteranganSelect.value;
+        keteranganSelect.innerHTML = '<option value="">Pilih Keterangan</option>' +
+            prestasiKeteranganOptions.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+        if (current && prestasiKeteranganOptions.includes(current)) {
+            keteranganSelect.value = current;
+        }
+    }
 }
 
 function showError() {
@@ -91,6 +127,7 @@ function resetForm() {
     document.getElementById('prestasi-mode').textContent = '';
     document.getElementById('prestasi-cancel').style.display = 'none';
     document.getElementById('prestasi-submit').textContent = 'Simpan';
+    populatePrestasiSelects();
 }
 
 function renderTable() {
@@ -130,7 +167,9 @@ async function loadData() {
             showError();
             return;
         }
+        await loadMasterData();
         prestasiData = (await getPrestasi()).filter(item => item.santri_id === santriId);
+        populatePrestasiSelects();
         displaySantriDetail();
         renderTable();
     } catch (error) {
@@ -209,8 +248,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         if (role !== 'admin') return;
 
-        if (!confirm('Apakah data sudah benar?')) return;
-
         const payload = {
             santri_id: santriId,
             nama_kegiatan: document.getElementById('prestasi-kegiatan').value.trim(),
@@ -229,7 +266,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             await insertPrestasi(payload);
         }
-        alert('Data prestasi berhasil disimpan.');
         await loadData();
         resetForm();
     });

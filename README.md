@@ -339,6 +339,166 @@ USING (
   )
 );
 ```
+
+## ⚙️ Master Data Catatan & Prestasi
+
+Tambahkan tabel master data berikut:
+
+```sql
+CREATE TABLE IF NOT EXISTS catatan_categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS catatan_subcategories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  category_id UUID REFERENCES catatan_categories(id) ON DELETE CASCADE NOT NULL,
+  group_name TEXT,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS catatan_keterangan_options (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  category_id UUID REFERENCES catatan_categories(id) ON DELETE CASCADE NOT NULL,
+  label TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS prestasi_categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS prestasi_keterangan_options (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  label TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+Tambahkan policy RLS untuk master data:
+
+```sql
+ALTER TABLE catatan_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE catatan_subcategories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE catatan_keterangan_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prestasi_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prestasi_keterangan_options ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Catatan categories viewable by authenticated users"
+ON catatan_categories FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Catatan subcategories viewable by authenticated users"
+ON catatan_subcategories FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Catatan keterangan viewable by authenticated users"
+ON catatan_keterangan_options FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Prestasi categories viewable by authenticated users"
+ON prestasi_categories FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Prestasi keterangan viewable by authenticated users"
+ON prestasi_keterangan_options FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Admins manage catatan categories"
+ON catatan_categories FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins manage catatan subcategories"
+ON catatan_subcategories FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins manage catatan keterangan"
+ON catatan_keterangan_options FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins manage prestasi categories"
+ON prestasi_categories FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins manage prestasi keterangan"
+ON prestasi_keterangan_options FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+```
+
+Seed awal (opsional):
+
+```sql
+INSERT INTO catatan_categories (name) VALUES
+('OPPM'), ('KGGP'), ('Instansi'), ('KMI'), ('Kepanitiaan')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO prestasi_categories (name) VALUES
+('OPPM'), ('KGGP'), ('Instansi'), ('KMI'), ('Antar Kampus')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO prestasi_keterangan_options (label) VALUES
+('Juara 1'), ('Juara 2'), ('Juara 3'), ('Harapan 1'), ('Harapan 2'), ('Harapan 3'), ('Pengikut')
+ON CONFLICT DO NOTHING;
+```
 Tambahkan policy RLS untuk tabel `raport_mental`:
 
 ```sql

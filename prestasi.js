@@ -1,10 +1,15 @@
 let prestasiData = [];
 let santriData = [];
+let prestasiCategories = [];
+let prestasiKeteranganOptions = [];
 let editingId = null;
 let currentPage = 1;
 const ITEMS_PER_PAGE = 20;
 let labelToIdMap = new Map();
 let idToLabelMap = new Map();
+
+const FALLBACK_PRESTASI_CATEGORIES = ['OPPM', 'KGGP', 'Instansi', 'KMI', 'Antar Kampus'];
+const FALLBACK_PRESTASI_KETERANGAN = ['Juara 1', 'Juara 2', 'Juara 3', 'Harapan 1', 'Harapan 2', 'Harapan 3', 'Pengikut'];
 
 function escapeHtml(value) {
     return (value || '')
@@ -88,6 +93,47 @@ function resolveSantriInput() {
     hidden.value = labelToIdMap.get(key) || '';
 }
 
+async function loadMasterData() {
+    const categories = await getPrestasiCategories();
+    const keterangan = await getPrestasiKeteranganOptions();
+
+    prestasiCategories = categories.length ? categories.map(item => item.name) : FALLBACK_PRESTASI_CATEGORIES;
+    prestasiKeteranganOptions = keterangan.length ? keterangan.map(item => item.label) : FALLBACK_PRESTASI_KETERANGAN;
+}
+
+function populatePrestasiSelects() {
+    const kategoriSelect = document.getElementById('prestasi-kategori');
+    const keteranganSelect = document.getElementById('prestasi-keterangan');
+    const filterSelect = document.getElementById('prestasi-filter-kategori');
+
+    if (kategoriSelect) {
+        const current = kategoriSelect.value;
+        kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>' +
+            prestasiCategories.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+        if (current && prestasiCategories.includes(current)) {
+            kategoriSelect.value = current;
+        }
+    }
+
+    if (keteranganSelect) {
+        const current = keteranganSelect.value;
+        keteranganSelect.innerHTML = '<option value="">Pilih Keterangan</option>' +
+            prestasiKeteranganOptions.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+        if (current && prestasiKeteranganOptions.includes(current)) {
+            keteranganSelect.value = current;
+        }
+    }
+
+    if (filterSelect) {
+        const current = filterSelect.value;
+        filterSelect.innerHTML = '<option value="">Semua Kategori</option>' +
+            prestasiCategories.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+        if (current && prestasiCategories.includes(current)) {
+            filterSelect.value = current;
+        }
+    }
+}
+
 function resetForm() {
     editingId = null;
     document.getElementById('prestasi-form').reset();
@@ -97,6 +143,7 @@ function resetForm() {
     document.getElementById('prestasi-submit').textContent = 'Simpan';
     const hidden = document.getElementById('prestasi-santri');
     if (hidden) hidden.value = '';
+    populatePrestasiSelects();
 }
 
 function buildPrestasiMap() {
@@ -201,8 +248,10 @@ async function loadData() {
     santriData = await getAllSantri();
     prestasiData = await getPrestasi();
     santriData.sort(compareSantri);
+    await loadMasterData();
     populateSantriDatalist();
     updateKelasFilter();
+    populatePrestasiSelects();
     renderSantriTable();
 }
 

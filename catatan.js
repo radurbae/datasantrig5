@@ -1,63 +1,58 @@
 let catatanData = [];
 let santriData = [];
+let catatanCategories = [];
+let catatanSubcategories = [];
+let catatanKeteranganOptions = [];
 let editingId = null;
 let currentPage = 1;
 const ITEMS_PER_PAGE = 20;
 let labelToIdMap = new Map();
 let idToLabelMap = new Map();
 
-const OPPM_ROLE_OPTIONS = ['Ketua', 'Sekretaris', 'Bendahara', 'Anggota'];
-
-const SUBCATEGORY_MAP = {
-    OPPM: [
-        'Bagian - Ketua OPPM',
-        'Bagian - Sekretaris Pusat',
-        'Bagian - Bendahara Pusat',
-        'Bagian - Keamanan',
-        'Bagian - Pengajaran',
-        'Bagian - Ta\'mir Masjid',
-        'Bagian - Penggerak Bahasa',
-        'Bagian - Olahraga',
-        'Bagian - Penerangan',
-        'Bagian - Koperasi Pelajar',
-        'Bagian - Koperasi Warung Pelajar',
-        'Bagian - Koperasi Dapur',
-        'Bagian - Penatu',
-        'Bagian - Kesenian',
-        'Bagian - Keterampilan',
-        'Bagian - Kesehatan',
-        'Bagian - Bersih Lingkungan',
-        'Bagian - Pertamanan',
-        'Bagian - Fotografi',
-        'Bagian - Penerimaan Tamu',
-        'Bagian - Perpustakaan',
-        'Rayon - Ghaza 1',
-        'Rayon - Ghaza 2',
-        'Rayon - Santiniketan',
-        'Rayon - Syanggit',
-        'Rayon - Mekkah',
-        'Rayon - Mesir',
-        'Rayon - Riyadh',
-        'Klub - Samba FC',
-        'Klub - Etihad FC',
-        'Klub - Soccer FC',
-        'Klub - Bima FC',
-        'Klub - Eternal FAC',
-        'Klub - Forious FAC',
-        'Klub - Emirates FAC',
-        'Klub - Libero FAC',
-        'Klub - Boeing BBC',
-        'Klub - Pioneer BBC',
-        'Klub - D\'Legend BC',
-        'Klub - Blaze VBC',
-        'Kursus - Gastrada',
-        'Kursus - Art Gallery',
-        'Kursus - X-Tidaq',
-        'Kursus - Alshodaq',
-        'Kursus - Vodcom',
-        'Kursus - Markaz Khot',
-        'Kursus - MBBND'
+const FALLBACK_CATATAN_CATEGORIES = ['OPPM', 'KGGP', 'Instansi', 'KMI', 'Kepanitiaan'];
+const FALLBACK_OPPM_GROUPS = {
+    Bagian: [
+        'Ketua OPPM',
+        'Sekretaris Pusat',
+        'Bendahara Pusat',
+        'Keamanan',
+        'Pengajaran',
+        "Ta'mir Masjid",
+        'Penggerak Bahasa',
+        'Olahraga',
+        'Penerangan',
+        'Koperasi Pelajar',
+        'Koperasi Warung Pelajar',
+        'Koperasi Dapur',
+        'Penatu',
+        'Kesenian',
+        'Keterampilan',
+        'Kesehatan',
+        'Bersih Lingkungan',
+        'Pertamanan',
+        'Fotografi',
+        'Penerimaan Tamu',
+        'Perpustakaan'
     ],
+    Rayon: ['Ghaza 1', 'Ghaza 2', 'Santiniketan', 'Syanggit', 'Mekkah', 'Mesir', 'Riyadh'],
+    Klub: [
+        'Samba FC',
+        'Etihad FC',
+        'Soccer FC',
+        'Bima FC',
+        'Eternal FAC',
+        'Forious FAC',
+        'Emirates FAC',
+        'Libero FAC',
+        'Boeing BBC',
+        'Pioneer BBC',
+        "D'Legend BC",
+        'Blaze VBC'
+    ],
+    Kursus: ['Gastrada', 'Art Gallery', 'X-Tidaq', 'Alshodaq', 'Vodcom', 'Markaz Khot', 'MBBND']
+};
+const FALLBACK_OPPM_KETERANGAN = ['Ketua', 'Sekretaris', 'Bendahara', 'Anggota'];
+const FALLBACK_SUBCATEGORIES = {
     KGGP: ['Bagian', 'POT', 'Kontingen'],
     Instansi: ['ITQAN', 'FP2WS', 'JMQ', 'JMH', 'DQPOS', 'LAB KMI'],
     Kepanitiaan: ['Panitia 1', 'Panitia 2', 'Panitia 3']
@@ -156,58 +151,190 @@ function getKmiOptions() {
     return kelasList.length ? kelasList : ['Kelas 1', 'Kelas 2', 'Kelas 3', 'Kelas 4', 'Kelas 5', 'Kelas 6'];
 }
 
-function populateSubcategory(category) {
-    const select = document.getElementById('catatan-subkategori');
-    if (!select) return;
-    let options = [];
-    if (category === 'KMI') {
-        options = getKmiOptions();
-    } else {
-        options = SUBCATEGORY_MAP[category] || [];
-    }
-    select.innerHTML = '<option value="">Pilih Sub Kategori</option>' +
-        options.map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('');
+function buildFallbackSubcategories() {
+    const items = [];
+    Object.entries(FALLBACK_OPPM_GROUPS).forEach(([group, names]) => {
+        names.forEach(name => {
+            items.push({ categoryName: 'OPPM', groupName: group, name });
+        });
+    });
+    Object.entries(FALLBACK_SUBCATEGORIES).forEach(([categoryName, names]) => {
+        names.forEach(name => {
+            items.push({ categoryName, groupName: '', name });
+        });
+    });
+    return items;
 }
 
-function updateKeteranganField(category) {
+async function loadMasterData() {
+    const categoryData = await getCatatanCategories();
+    const subcategoryData = await getCatatanSubcategories();
+    const keteranganData = await getCatatanKeteranganOptions();
+
+    if (categoryData.length) {
+        catatanCategories = categoryData.map(item => ({ id: item.id, name: item.name }));
+    } else {
+        catatanCategories = FALLBACK_CATATAN_CATEGORIES.map(name => ({ id: null, name }));
+    }
+
+    const categoryById = new Map(catatanCategories.filter(c => c.id).map(c => [c.id, c.name]));
+    if (subcategoryData.length) {
+        catatanSubcategories = subcategoryData.map(item => ({
+            id: item.id,
+            categoryId: item.category_id,
+            categoryName: categoryById.get(item.category_id) || 'Unknown',
+            groupName: item.group_name || '',
+            name: item.name
+        }));
+    } else {
+        catatanSubcategories = buildFallbackSubcategories();
+    }
+
+    if (keteranganData.length) {
+        catatanKeteranganOptions = keteranganData.map(item => ({
+            id: item.id,
+            categoryId: item.category_id,
+            categoryName: categoryById.get(item.category_id) || 'Unknown',
+            label: item.label
+        }));
+    } else {
+        catatanKeteranganOptions = FALLBACK_OPPM_KETERANGAN.map(label => ({
+            id: null,
+            categoryId: null,
+            categoryName: 'OPPM',
+            label
+        }));
+    }
+}
+
+function populateCategorySelect() {
+    const select = document.getElementById('catatan-kategori');
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = '<option value="">Pilih Kategori</option>' +
+        catatanCategories.map(item => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`).join('');
+    if (current && catatanCategories.some(item => item.name === current)) {
+        select.value = current;
+    }
+}
+
+function populateFilterKategori() {
+    const select = document.getElementById('catatan-filter-kategori');
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = '<option value=\"\">Semua Kategori</option>' +
+        catatanCategories.map(item => `<option value=\"${escapeHtml(item.name)}\">${escapeHtml(item.name)}</option>`).join('');
+    if (current && catatanCategories.some(item => item.name === current)) {
+        select.value = current;
+    }
+}
+
+function populateSubcategoryGroup(categoryName, preferredGroup) {
+    const field = document.getElementById('catatan-subkategori-group-field');
+    const select = document.getElementById('catatan-subkategori-group');
+    if (!field || !select) return '';
+
+    const groups = [...new Set(catatanSubcategories
+        .filter(item => item.categoryName === categoryName)
+        .map(item => item.groupName)
+        .filter(group => group))];
+
+    if (!groups.length) {
+        field.style.display = 'none';
+        select.innerHTML = '<option value="">Pilih Jenis</option>';
+        select.required = false;
+        return '';
+    }
+
+    field.style.display = 'block';
+    select.required = true;
+    select.innerHTML = '<option value="">Pilih Jenis</option>' +
+        groups.map(group => `<option value="${escapeHtml(group)}">${escapeHtml(group)}</option>`).join('');
+    if (preferredGroup && groups.includes(preferredGroup)) {
+        select.value = preferredGroup;
+    } else if (!select.value && groups.length === 1) {
+        select.value = groups[0];
+    }
+
+    return select.value;
+}
+
+function populateSubcategorySelect(categoryName, groupName, preferredSubcategory) {
+    const select = document.getElementById('catatan-subkategori');
+    if (!select) return;
+
+    let options = [];
+    const hasMasterSubcategories = catatanSubcategories.some(item => item.categoryName === categoryName);
+    if (categoryName === 'KMI' && !hasMasterSubcategories) {
+        options = getKmiOptions();
+    } else {
+        options = catatanSubcategories
+            .filter(item => item.categoryName === categoryName)
+            .filter(item => !groupName || item.groupName === groupName)
+            .map(item => item.name);
+    }
+
+    select.innerHTML = '<option value="">Pilih Sub Kategori</option>' +
+        options.map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('');
+
+    if (preferredSubcategory && options.includes(preferredSubcategory)) {
+        select.value = preferredSubcategory;
+    }
+}
+
+function populateKeteranganSelect(categoryName, preferredValue) {
     const textInput = document.getElementById('catatan-keterangan-text');
     const selectInput = document.getElementById('catatan-keterangan-select');
     if (!textInput || !selectInput) return;
 
-    if (category === 'OPPM') {
-        textInput.style.display = 'none';
+    const options = catatanKeteranganOptions
+        .filter(item => item.categoryName === categoryName)
+        .map(item => item.label);
+
+    if (options.length) {
         selectInput.style.display = 'block';
-        textInput.value = '';
-    } else {
-        selectInput.style.display = 'none';
-        textInput.style.display = 'block';
-        selectInput.value = '';
-    }
-}
-
-function getKeteranganValue(category) {
-    if (category === 'OPPM') {
-        return document.getElementById('catatan-keterangan-select').value;
-    }
-    return document.getElementById('catatan-keterangan-text').value.trim();
-}
-
-function setKeteranganValue(category, value) {
-    const textInput = document.getElementById('catatan-keterangan-text');
-    const selectInput = document.getElementById('catatan-keterangan-select');
-    if (category === 'OPPM') {
-        updateKeteranganField('OPPM');
-        if (OPPM_ROLE_OPTIONS.includes(value)) {
-            selectInput.value = value;
+        textInput.style.display = 'none';
+        selectInput.required = true;
+        textInput.required = false;
+        selectInput.innerHTML = '<option value="">Pilih Keterangan</option>' +
+            options.map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('');
+        if (preferredValue && options.includes(preferredValue)) {
+            selectInput.value = preferredValue;
         } else {
             selectInput.value = '';
         }
         textInput.value = '';
     } else {
-        updateKeteranganField(category);
-        textInput.value = value || '';
-        selectInput.value = '';
+        selectInput.style.display = 'none';
+        textInput.style.display = 'block';
+        selectInput.required = false;
+        textInput.required = true;
+        selectInput.innerHTML = '<option value="">Pilih Keterangan</option>';
+        textInput.value = preferredValue || '';
     }
+}
+
+function getKeteranganValue(categoryName) {
+    const textInput = document.getElementById('catatan-keterangan-text');
+    const selectInput = document.getElementById('catatan-keterangan-select');
+    if (!textInput || !selectInput) return '';
+
+    const hasOptions = catatanKeteranganOptions.some(item => item.categoryName === categoryName);
+    if (hasOptions) {
+        return selectInput.value;
+    }
+    return textInput.value.trim();
+}
+
+function findGroupForSubcategory(categoryName, subcategoryName) {
+    const match = catatanSubcategories.find(item => item.categoryName === categoryName && item.name === subcategoryName);
+    return match ? match.groupName : '';
+}
+
+function updateCategoryDependentFields(categoryName, preferredSubcategory, preferredKeterangan) {
+    const groupName = populateSubcategoryGroup(categoryName, findGroupForSubcategory(categoryName, preferredSubcategory));
+    populateSubcategorySelect(categoryName, groupName, preferredSubcategory);
+    populateKeteranganSelect(categoryName, preferredKeterangan);
 }
 
 function resetForm() {
@@ -217,8 +344,7 @@ function resetForm() {
     document.getElementById('catatan-mode').textContent = '';
     document.getElementById('catatan-cancel').style.display = 'none';
     document.getElementById('catatan-submit').textContent = 'Simpan';
-    populateSubcategory('');
-    updateKeteranganField('');
+    updateCategoryDependentFields('', '', '');
     const hidden = document.getElementById('catatan-santri');
     if (hidden) hidden.value = '';
 }
@@ -325,19 +451,19 @@ async function loadData() {
     santriData = await getAllSantri();
     catatanData = await getCatatan();
     santriData.sort(compareSantri);
+    await loadMasterData();
     populateSantriDatalist();
     updateKelasFilter();
+    populateCategorySelect();
+    populateFilterKategori();
+    updateCategoryDependentFields(document.getElementById('catatan-kategori').value, '', '');
     renderSantriTable();
-    populateSubcategory(document.getElementById('catatan-kategori').value);
-    updateKeteranganField(document.getElementById('catatan-kategori').value);
 }
 
 function setFormFromItem(item) {
     editingId = item.id;
     document.getElementById('catatan-kategori').value = item.kategori || '';
-    populateSubcategory(item.kategori);
-    document.getElementById('catatan-subkategori').value = item.sub_kategori || '';
-    setKeteranganValue(item.kategori, item.keterangan || '');
+    updateCategoryDependentFields(item.kategori || '', item.sub_kategori || '', item.keterangan || '');
     document.getElementById('catatan-tahun').value = item.tahun_ajaran || getHijriAcademicYear();
     document.getElementById('catatan-mode').textContent = 'Mode: Edit';
     document.getElementById('catatan-cancel').style.display = 'inline-flex';
@@ -380,8 +506,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('catatan-cancel').addEventListener('click', resetForm);
     document.getElementById('catatan-kategori').addEventListener('change', (e) => {
-        populateSubcategory(e.target.value);
-        updateKeteranganField(e.target.value);
+        updateCategoryDependentFields(e.target.value, '', '');
+    });
+    document.getElementById('catatan-subkategori-group').addEventListener('change', () => {
+        const category = document.getElementById('catatan-kategori').value;
+        const group = document.getElementById('catatan-subkategori-group').value;
+        populateSubcategorySelect(category, group, '');
     });
     document.getElementById('catatan-santri-input').addEventListener('input', () => {
         const hidden = document.getElementById('catatan-santri');

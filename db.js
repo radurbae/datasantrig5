@@ -465,6 +465,402 @@ async function deleteCatatan(id) {
     }
 }
 
+async function getCatatanCategories() {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('catatan_categories')
+            .select('*')
+            .order('name', { ascending: true });
+        if (error) {
+            console.error('Error fetching catatan categories:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getCatatanCategories:', error);
+        return [];
+    }
+}
+
+async function insertCatatanCategory(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('catatan_categories')
+            .insert([payload])
+            .select()
+            .single();
+        if (error) {
+            console.error('Error inserting catatan category:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in insertCatatanCategory:', error);
+        return null;
+    }
+}
+
+async function updateCatatanCategory(id, payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('catatan_categories')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) {
+            console.error('Error updating catatan category:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in updateCatatanCategory:', error);
+        return null;
+    }
+}
+
+async function deleteCatatanCategory(id) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return false;
+        const { error } = await client
+            .from('catatan_categories')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            console.error('Error deleting catatan category:', error);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error in deleteCatatanCategory:', error);
+        return false;
+    }
+}
+
+async function getCatatanSubcategories() {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('catatan_subcategories')
+            .select('*')
+            .order('group_name', { ascending: true })
+            .order('name', { ascending: true });
+        if (error) {
+            console.error('Error fetching catatan subcategories:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getCatatanSubcategories:', error);
+        return [];
+    }
+}
+
+async function insertCatatanSubcategory(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('catatan_subcategories')
+            .insert([payload])
+            .select()
+            .single();
+        if (error) {
+            console.error('Error inserting catatan subcategory:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in insertCatatanSubcategory:', error);
+        return null;
+    }
+}
+
+async function updateCatatanSubcategory(id, payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('catatan_subcategories')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) {
+            console.error('Error updating catatan subcategory:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in updateCatatanSubcategory:', error);
+        return null;
+    }
+}
+
+async function deleteCatatanSubcategory(id) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return false;
+        const { error } = await client
+            .from('catatan_subcategories')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            console.error('Error deleting catatan subcategory:', error);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error in deleteCatatanSubcategory:', error);
+        return false;
+    }
+}
+
+async function getCatatanKeteranganOptions() {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('catatan_keterangan_options')
+            .select('*')
+            .order('label', { ascending: true });
+        if (error) {
+            console.error('Error fetching catatan keterangan options:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getCatatanKeteranganOptions:', error);
+        return [];
+    }
+}
+
+async function insertCatatanKeteranganOption(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('catatan_keterangan_options')
+            .insert([payload])
+            .select()
+            .single();
+        if (error) {
+            console.error('Error inserting catatan keterangan option:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in insertCatatanKeteranganOption:', error);
+        return null;
+    }
+}
+
+async function updateCatatanKeteranganOption(id, payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('catatan_keterangan_options')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) {
+            console.error('Error updating catatan keterangan option:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in updateCatatanKeteranganOption:', error);
+        return null;
+    }
+}
+
+async function deleteCatatanKeteranganOption(id) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return false;
+        const { error } = await client
+            .from('catatan_keterangan_options')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            console.error('Error deleting catatan keterangan option:', error);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error in deleteCatatanKeteranganOption:', error);
+        return false;
+    }
+}
+
+async function getPrestasiCategories() {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('prestasi_categories')
+            .select('*')
+            .order('name', { ascending: true });
+        if (error) {
+            console.error('Error fetching prestasi categories:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getPrestasiCategories:', error);
+        return [];
+    }
+}
+
+async function insertPrestasiCategory(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('prestasi_categories')
+            .insert([payload])
+            .select()
+            .single();
+        if (error) {
+            console.error('Error inserting prestasi category:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in insertPrestasiCategory:', error);
+        return null;
+    }
+}
+
+async function updatePrestasiCategory(id, payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('prestasi_categories')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) {
+            console.error('Error updating prestasi category:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in updatePrestasiCategory:', error);
+        return null;
+    }
+}
+
+async function deletePrestasiCategory(id) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return false;
+        const { error } = await client
+            .from('prestasi_categories')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            console.error('Error deleting prestasi category:', error);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error in deletePrestasiCategory:', error);
+        return false;
+    }
+}
+
+async function getPrestasiKeteranganOptions() {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('prestasi_keterangan_options')
+            .select('*')
+            .order('label', { ascending: true });
+        if (error) {
+            console.error('Error fetching prestasi keterangan options:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getPrestasiKeteranganOptions:', error);
+        return [];
+    }
+}
+
+async function insertPrestasiKeteranganOption(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('prestasi_keterangan_options')
+            .insert([payload])
+            .select()
+            .single();
+        if (error) {
+            console.error('Error inserting prestasi keterangan option:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in insertPrestasiKeteranganOption:', error);
+        return null;
+    }
+}
+
+async function updatePrestasiKeteranganOption(id, payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('prestasi_keterangan_options')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) {
+            console.error('Error updating prestasi keterangan option:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in updatePrestasiKeteranganOption:', error);
+        return null;
+    }
+}
+
+async function deletePrestasiKeteranganOption(id) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return false;
+        const { error } = await client
+            .from('prestasi_keterangan_options')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            console.error('Error deleting prestasi keterangan option:', error);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error in deletePrestasiKeteranganOption:', error);
+        return false;
+    }
+}
+
 /**
  * Convert Supabase data (snake_case) to app format (camelCase)
  * @param {Object} supabaseData - Data from Supabase
