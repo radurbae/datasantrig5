@@ -2,6 +2,7 @@ let prestasiData = [];
 let santriData = [];
 let prestasiCategories = [];
 let prestasiKeteranganOptions = [];
+let prestasiKegiatanOptions = [];
 let editingId = null;
 let currentPage = 1;
 const ITEMS_PER_PAGE = 20;
@@ -85,6 +86,15 @@ function populateSantriDatalist() {
     datalist.innerHTML = options;
 }
 
+function populateKegiatanDatalist() {
+    const datalist = document.getElementById('prestasi-kegiatan-list');
+    if (!datalist) return;
+    const options = prestasiKegiatanOptions.map(item => `
+        <option value="${escapeHtml(item)}"></option>
+    `).join('');
+    datalist.innerHTML = options;
+}
+
 function resolveSantriInput() {
     const input = document.getElementById('prestasi-santri-input');
     const hidden = document.getElementById('prestasi-santri');
@@ -96,9 +106,11 @@ function resolveSantriInput() {
 async function loadMasterData() {
     const categories = await getPrestasiCategories();
     const keterangan = await getPrestasiKeteranganOptions();
+    const kegiatan = await getPrestasiKegiatanOptions();
 
     prestasiCategories = categories.length ? categories.map(item => item.name) : FALLBACK_PRESTASI_CATEGORIES;
     prestasiKeteranganOptions = keterangan.length ? keterangan.map(item => item.label) : FALLBACK_PRESTASI_KETERANGAN;
+    prestasiKegiatanOptions = kegiatan.length ? kegiatan.map(item => item.label) : [];
 }
 
 function populatePrestasiSelects() {
@@ -132,6 +144,8 @@ function populatePrestasiSelects() {
             filterSelect.value = current;
         }
     }
+
+    populateKegiatanDatalist();
 }
 
 function resetForm() {

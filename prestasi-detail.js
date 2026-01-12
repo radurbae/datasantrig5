@@ -3,6 +3,7 @@ let santriData = null;
 let prestasiData = [];
 let prestasiCategories = [];
 let prestasiKeteranganOptions = [];
+let prestasiKegiatanOptions = [];
 let editingId = null;
 
 const FALLBACK_PRESTASI_CATEGORIES = ['OPPM', 'KGGP', 'Instansi', 'KMI', 'Antar Kampus'];
@@ -49,14 +50,17 @@ function getHijriAcademicYear() {
 async function loadMasterData() {
     const categories = await getPrestasiCategories();
     const keterangan = await getPrestasiKeteranganOptions();
+    const kegiatan = await getPrestasiKegiatanOptions();
 
     prestasiCategories = categories.length ? categories.map(item => item.name) : FALLBACK_PRESTASI_CATEGORIES;
     prestasiKeteranganOptions = keterangan.length ? keterangan.map(item => item.label) : FALLBACK_PRESTASI_KETERANGAN;
+    prestasiKegiatanOptions = kegiatan.length ? kegiatan.map(item => item.label) : [];
 }
 
 function populatePrestasiSelects() {
     const kategoriSelect = document.getElementById('prestasi-kategori');
     const keteranganSelect = document.getElementById('prestasi-keterangan');
+    const kegiatanList = document.getElementById('prestasi-kegiatan-list');
 
     if (kategoriSelect) {
         const current = kategoriSelect.value;
@@ -74,6 +78,12 @@ function populatePrestasiSelects() {
         if (current && prestasiKeteranganOptions.includes(current)) {
             keteranganSelect.value = current;
         }
+    }
+
+    if (kegiatanList) {
+        kegiatanList.innerHTML = prestasiKegiatanOptions.map(item => `
+            <option value="${escapeHtml(item)}"></option>
+        `).join('');
     }
 }
 

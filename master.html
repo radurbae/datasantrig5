@@ -246,6 +246,43 @@
                         </div>
                     </div>
                 </section>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Prestasi - Nama Kegiatan</h2>
+                            <span class="overview-total" id="prestasi-kegiatan-mode"></span>
+                        </div>
+                        <form id="prestasi-kegiatan-form" class="report-form">
+                            <div class="report-grid">
+                                <div class="form-group">
+                                    <label for="prestasi-kegiatan-label">Nama Kegiatan</label>
+                                    <input type="text" id="prestasi-kegiatan-label" placeholder="Contoh: Olimpiade Bahasa" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="prestasi-kegiatan-submit">Simpan</button>
+                                <button type="button" class="btn btn-secondary" id="prestasi-kegiatan-cancel" style="display: none;">Batal</button>
+                            </div>
+                        </form>
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama Kegiatan</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prestasi-kegiatan-tbody">
+                                    <tr>
+                                        <td colspan="3" class="empty-state">Belum ada data nama kegiatan.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
@@ -253,6 +290,6 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="db.js"></script>
-    <script src="master.js?v=1"></script>
+    <script src="master.js?v=2"></script>
 </body>
 </html>

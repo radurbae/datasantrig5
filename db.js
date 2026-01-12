@@ -801,6 +801,85 @@ async function getPrestasiKeteranganOptions() {
     }
 }
 
+async function getPrestasiKegiatanOptions() {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('prestasi_kegiatan_options')
+            .select('*')
+            .order('label', { ascending: true });
+        if (error) {
+            console.error('Error fetching prestasi kegiatan options:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getPrestasiKegiatanOptions:', error);
+        return [];
+    }
+}
+
+async function insertPrestasiKegiatanOption(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('prestasi_kegiatan_options')
+            .insert([payload])
+            .select()
+            .single();
+        if (error) {
+            console.error('Error inserting prestasi kegiatan option:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in insertPrestasiKegiatanOption:', error);
+        return null;
+    }
+}
+
+async function updatePrestasiKegiatanOption(id, payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('prestasi_kegiatan_options')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) {
+            console.error('Error updating prestasi kegiatan option:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in updatePrestasiKegiatanOption:', error);
+        return null;
+    }
+}
+
+async function deletePrestasiKegiatanOption(id) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return false;
+        const { error } = await client
+            .from('prestasi_kegiatan_options')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            console.error('Error deleting prestasi kegiatan option:', error);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error in deletePrestasiKegiatanOption:', error);
+        return false;
+    }
+}
+
 async function insertPrestasiKeteranganOption(payload) {
     try {
         const client = getSupabaseClient();

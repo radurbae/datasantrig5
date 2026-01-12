@@ -377,6 +377,12 @@ CREATE TABLE IF NOT EXISTS prestasi_keterangan_options (
   label TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS prestasi_kegiatan_options (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  label TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 ```
 
 Tambahkan policy RLS untuk master data:
@@ -387,6 +393,7 @@ ALTER TABLE catatan_subcategories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE catatan_keterangan_options ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prestasi_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prestasi_keterangan_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prestasi_kegiatan_options ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Catatan categories viewable by authenticated users"
 ON catatan_categories FOR SELECT
@@ -406,6 +413,10 @@ USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Prestasi keterangan viewable by authenticated users"
 ON prestasi_keterangan_options FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Prestasi kegiatan viewable by authenticated users"
+ON prestasi_kegiatan_options FOR SELECT
 USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Admins manage catatan categories"
@@ -482,6 +493,21 @@ WITH CHECK (
     WHERE p.id = auth.uid() AND p.role = 'admin'
   )
 );
+
+CREATE POLICY "Admins manage prestasi kegiatan"
+ON prestasi_kegiatan_options FOR ALL
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
 ```
 
 Seed awal (opsional):
@@ -497,6 +523,10 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO prestasi_keterangan_options (label) VALUES
 ('Juara 1'), ('Juara 2'), ('Juara 3'), ('Harapan 1'), ('Harapan 2'), ('Harapan 3'), ('Pengikut')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO prestasi_kegiatan_options (label) VALUES
+('Lomba Pidato'), ('Lomba Kaligrafi'), ('Olimpiade Bahasa')
 ON CONFLICT DO NOTHING;
 ```
 Tambahkan policy RLS untuk tabel `raport_mental`:
