@@ -261,6 +261,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         if (role !== 'admin') return;
 
+        if (!confirm('Apakah data sudah benar?')) return;
+
         const payload = {
             santri_id: santriId,
             kategori: document.getElementById('catatan-kategori').value,
@@ -279,6 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             await insertCatatan(payload);
         }
+        alert('Data catatan berhasil disimpan.');
         await loadData();
         resetForm();
     });

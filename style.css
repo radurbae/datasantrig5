@@ -954,6 +954,10 @@ header.page-header h1 {
     flex-direction: column;
 }
 
+.detail-spacer {
+    margin-top: 28px;
+}
+
 .detail-header {
     display: flex;
     align-items: flex-start;

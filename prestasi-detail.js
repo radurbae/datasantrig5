@@ -209,6 +209,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         if (role !== 'admin') return;
 
+        if (!confirm('Apakah data sudah benar?')) return;
+
         const payload = {
             santri_id: santriId,
             nama_kegiatan: document.getElementById('prestasi-kegiatan').value.trim(),
@@ -227,6 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             await insertPrestasi(payload);
         }
+        alert('Data prestasi berhasil disimpan.');
         await loadData();
         resetForm();
     });
