@@ -42,6 +42,26 @@ function setEditMode(idPrefix, text) {
     if (submit) submit.textContent = 'Update';
 }
 
+async function handleSubmit({
+    confirmMessage,
+    successMessage,
+    failureMessage,
+    run,
+    onSuccess
+}) {
+    if (!confirm(confirmMessage)) return false;
+    const result = await run();
+    if (result) {
+        alert(successMessage);
+        if (onSuccess) {
+            await onSuccess();
+        }
+        return true;
+    }
+    alert(failureMessage);
+    return false;
+}
+
 function populateCategorySelects() {
     const catatanOptions = '<option value="">Pilih Kategori</option>' +
         catatanCategories.map(item => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join('');
@@ -217,14 +237,22 @@ function setupFormHandlers() {
         const name = document.getElementById('catatan-category-name').value.trim();
         if (!name) return;
 
-        if (editingCatatanCategoryId) {
-            await updateCatatanCategory(editingCatatanCategoryId, { name });
-        } else {
-            await insertCatatanCategory({ name });
-        }
-        editingCatatanCategoryId = null;
-        resetForm('catatan-category');
-        await loadMasterData();
+        await handleSubmit({
+            confirmMessage: 'Apakah data ini sudah benar?',
+            successMessage: 'Data kategori catatan berhasil disimpan.',
+            failureMessage: 'Data kategori catatan gagal disimpan.',
+            run: async () => {
+                if (editingCatatanCategoryId) {
+                    return updateCatatanCategory(editingCatatanCategoryId, { name });
+                }
+                return insertCatatanCategory({ name });
+            },
+            onSuccess: async () => {
+                editingCatatanCategoryId = null;
+                resetForm('catatan-category');
+                await loadMasterData();
+            }
+        });
     });
 
     document.getElementById('catatan-category-cancel').addEventListener('click', () => {
@@ -245,14 +273,22 @@ function setupFormHandlers() {
             name
         };
 
-        if (editingCatatanSubcategoryId) {
-            await updateCatatanSubcategory(editingCatatanSubcategoryId, payload);
-        } else {
-            await insertCatatanSubcategory(payload);
-        }
-        editingCatatanSubcategoryId = null;
-        resetForm('catatan-subcategory');
-        await loadMasterData();
+        await handleSubmit({
+            confirmMessage: 'Apakah data ini sudah benar?',
+            successMessage: 'Data sub kategori catatan berhasil disimpan.',
+            failureMessage: 'Data sub kategori catatan gagal disimpan.',
+            run: async () => {
+                if (editingCatatanSubcategoryId) {
+                    return updateCatatanSubcategory(editingCatatanSubcategoryId, payload);
+                }
+                return insertCatatanSubcategory(payload);
+            },
+            onSuccess: async () => {
+                editingCatatanSubcategoryId = null;
+                resetForm('catatan-subcategory');
+                await loadMasterData();
+            }
+        });
     });
 
     document.getElementById('catatan-subcategory-cancel').addEventListener('click', () => {
@@ -266,19 +302,24 @@ function setupFormHandlers() {
         const label = document.getElementById('catatan-keterangan-label').value.trim();
         if (!categoryId || !label) return;
 
-        const payload = {
-            category_id: categoryId,
-            label
-        };
+        const payload = { category_id: categoryId, label };
 
-        if (editingCatatanKeteranganId) {
-            await updateCatatanKeteranganOption(editingCatatanKeteranganId, payload);
-        } else {
-            await insertCatatanKeteranganOption(payload);
-        }
-        editingCatatanKeteranganId = null;
-        resetForm('catatan-keterangan');
-        await loadMasterData();
+        await handleSubmit({
+            confirmMessage: 'Apakah data ini sudah benar?',
+            successMessage: 'Data keterangan catatan berhasil disimpan.',
+            failureMessage: 'Data keterangan catatan gagal disimpan.',
+            run: async () => {
+                if (editingCatatanKeteranganId) {
+                    return updateCatatanKeteranganOption(editingCatatanKeteranganId, payload);
+                }
+                return insertCatatanKeteranganOption(payload);
+            },
+            onSuccess: async () => {
+                editingCatatanKeteranganId = null;
+                resetForm('catatan-keterangan');
+                await loadMasterData();
+            }
+        });
     });
 
     document.getElementById('catatan-keterangan-cancel').addEventListener('click', () => {
@@ -291,14 +332,22 @@ function setupFormHandlers() {
         const name = document.getElementById('prestasi-category-name').value.trim();
         if (!name) return;
 
-        if (editingPrestasiCategoryId) {
-            await updatePrestasiCategory(editingPrestasiCategoryId, { name });
-        } else {
-            await insertPrestasiCategory({ name });
-        }
-        editingPrestasiCategoryId = null;
-        resetForm('prestasi-category');
-        await loadMasterData();
+        await handleSubmit({
+            confirmMessage: 'Apakah data ini sudah benar?',
+            successMessage: 'Data kategori prestasi berhasil disimpan.',
+            failureMessage: 'Data kategori prestasi gagal disimpan.',
+            run: async () => {
+                if (editingPrestasiCategoryId) {
+                    return updatePrestasiCategory(editingPrestasiCategoryId, { name });
+                }
+                return insertPrestasiCategory({ name });
+            },
+            onSuccess: async () => {
+                editingPrestasiCategoryId = null;
+                resetForm('prestasi-category');
+                await loadMasterData();
+            }
+        });
     });
 
     document.getElementById('prestasi-category-cancel').addEventListener('click', () => {
@@ -313,14 +362,22 @@ function setupFormHandlers() {
 
         const payload = { label };
 
-        if (editingPrestasiKeteranganId) {
-            await updatePrestasiKeteranganOption(editingPrestasiKeteranganId, payload);
-        } else {
-            await insertPrestasiKeteranganOption(payload);
-        }
-        editingPrestasiKeteranganId = null;
-        resetForm('prestasi-keterangan');
-        await loadMasterData();
+        await handleSubmit({
+            confirmMessage: 'Apakah data ini sudah benar?',
+            successMessage: 'Data keterangan prestasi berhasil disimpan.',
+            failureMessage: 'Data keterangan prestasi gagal disimpan.',
+            run: async () => {
+                if (editingPrestasiKeteranganId) {
+                    return updatePrestasiKeteranganOption(editingPrestasiKeteranganId, payload);
+                }
+                return insertPrestasiKeteranganOption(payload);
+            },
+            onSuccess: async () => {
+                editingPrestasiKeteranganId = null;
+                resetForm('prestasi-keterangan');
+                await loadMasterData();
+            }
+        });
     });
 
     document.getElementById('prestasi-keterangan-cancel').addEventListener('click', () => {
@@ -335,14 +392,22 @@ function setupFormHandlers() {
 
         const payload = { label };
 
-        if (editingPrestasiKegiatanId) {
-            await updatePrestasiKegiatanOption(editingPrestasiKegiatanId, payload);
-        } else {
-            await insertPrestasiKegiatanOption(payload);
-        }
-        editingPrestasiKegiatanId = null;
-        resetForm('prestasi-kegiatan');
-        await loadMasterData();
+        await handleSubmit({
+            confirmMessage: 'Apakah data ini sudah benar?',
+            successMessage: 'Data nama kegiatan berhasil disimpan.',
+            failureMessage: 'Data nama kegiatan gagal disimpan.',
+            run: async () => {
+                if (editingPrestasiKegiatanId) {
+                    return updatePrestasiKegiatanOption(editingPrestasiKegiatanId, payload);
+                }
+                return insertPrestasiKegiatanOption(payload);
+            },
+            onSuccess: async () => {
+                editingPrestasiKegiatanId = null;
+                resetForm('prestasi-kegiatan');
+                await loadMasterData();
+            }
+        });
     });
 
     document.getElementById('prestasi-kegiatan-cancel').addEventListener('click', () => {

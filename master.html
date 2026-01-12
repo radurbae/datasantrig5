@@ -38,8 +38,119 @@
             <div class="content-wrap">
                 <header class="page-header">
                     <h1>Master Data</h1>
-                    <p class="subtitle">Kelola kategori dan sub kategori untuk catatan dan prestasi</p>
+                    <p class="subtitle">Kelola data prestasi dulu, lalu lanjutkan catatan</p>
                 </header>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Prestasi - Kategori</h2>
+                            <span class="overview-total" id="prestasi-category-mode"></span>
+                        </div>
+                        <form id="prestasi-category-form" class="report-form">
+                            <div class="report-grid">
+                                <div class="form-group">
+                                    <label for="prestasi-category-name">Nama Kategori</label>
+                                    <input type="text" id="prestasi-category-name" placeholder="Contoh: OPPM" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="prestasi-category-submit">Simpan</button>
+                                <button type="button" class="btn btn-secondary" id="prestasi-category-cancel" style="display: none;">Batal</button>
+                            </div>
+                        </form>
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prestasi-category-tbody">
+                                    <tr>
+                                        <td colspan="3" class="empty-state">Belum ada data kategori prestasi.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Prestasi - Nama Kegiatan</h2>
+                            <span class="overview-total" id="prestasi-kegiatan-mode"></span>
+                        </div>
+                        <form id="prestasi-kegiatan-form" class="report-form">
+                            <div class="report-grid">
+                                <div class="form-group">
+                                    <label for="prestasi-kegiatan-label">Nama Kegiatan</label>
+                                    <input type="text" id="prestasi-kegiatan-label" placeholder="Contoh: Olimpiade Bahasa" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="prestasi-kegiatan-submit">Simpan</button>
+                                <button type="button" class="btn btn-secondary" id="prestasi-kegiatan-cancel" style="display: none;">Batal</button>
+                            </div>
+                        </form>
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama Kegiatan</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prestasi-kegiatan-tbody">
+                                    <tr>
+                                        <td colspan="3" class="empty-state">Belum ada data nama kegiatan.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Prestasi - Keterangan</h2>
+                            <span class="overview-total" id="prestasi-keterangan-mode"></span>
+                        </div>
+                        <form id="prestasi-keterangan-form" class="report-form">
+                            <div class="report-grid">
+                                <div class="form-group">
+                                    <label for="prestasi-keterangan-label">Label Keterangan</label>
+                                    <input type="text" id="prestasi-keterangan-label" placeholder="Contoh: Juara 1" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="prestasi-keterangan-submit">Simpan</button>
+                                <button type="button" class="btn btn-secondary" id="prestasi-keterangan-cancel" style="display: none;">Batal</button>
+                            </div>
+                        </form>
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Label</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prestasi-keterangan-tbody">
+                                    <tr>
+                                        <td colspan="3" class="empty-state">Belum ada data keterangan prestasi.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
 
                 <section class="overview-section">
                     <div class="overview-card">
@@ -172,117 +283,6 @@
                         </div>
                     </div>
                 </section>
-
-                <section class="overview-section">
-                    <div class="overview-card">
-                        <div class="overview-header">
-                            <h2>Prestasi - Kategori</h2>
-                            <span class="overview-total" id="prestasi-category-mode"></span>
-                        </div>
-                        <form id="prestasi-category-form" class="report-form">
-                            <div class="report-grid">
-                                <div class="form-group">
-                                    <label for="prestasi-category-name">Nama Kategori</label>
-                                    <input type="text" id="prestasi-category-name" placeholder="Contoh: OPPM" required>
-                                </div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" id="prestasi-category-submit">Simpan</button>
-                                <button type="button" class="btn btn-secondary" id="prestasi-category-cancel" style="display: none;">Batal</button>
-                            </div>
-                        </form>
-                        <div class="table-container">
-                            <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="prestasi-category-tbody">
-                                    <tr>
-                                        <td colspan="3" class="empty-state">Belum ada data kategori prestasi.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="overview-section">
-                    <div class="overview-card">
-                        <div class="overview-header">
-                            <h2>Prestasi - Keterangan</h2>
-                            <span class="overview-total" id="prestasi-keterangan-mode"></span>
-                        </div>
-                        <form id="prestasi-keterangan-form" class="report-form">
-                            <div class="report-grid">
-                                <div class="form-group">
-                                    <label for="prestasi-keterangan-label">Label Keterangan</label>
-                                    <input type="text" id="prestasi-keterangan-label" placeholder="Contoh: Juara 1" required>
-                                </div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" id="prestasi-keterangan-submit">Simpan</button>
-                                <button type="button" class="btn btn-secondary" id="prestasi-keterangan-cancel" style="display: none;">Batal</button>
-                            </div>
-                        </form>
-                        <div class="table-container">
-                            <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Label</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="prestasi-keterangan-tbody">
-                                    <tr>
-                                        <td colspan="3" class="empty-state">Belum ada data keterangan prestasi.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="overview-section">
-                    <div class="overview-card">
-                        <div class="overview-header">
-                            <h2>Prestasi - Nama Kegiatan</h2>
-                            <span class="overview-total" id="prestasi-kegiatan-mode"></span>
-                        </div>
-                        <form id="prestasi-kegiatan-form" class="report-form">
-                            <div class="report-grid">
-                                <div class="form-group">
-                                    <label for="prestasi-kegiatan-label">Nama Kegiatan</label>
-                                    <input type="text" id="prestasi-kegiatan-label" placeholder="Contoh: Olimpiade Bahasa" required>
-                                </div>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary" id="prestasi-kegiatan-submit">Simpan</button>
-                                <button type="button" class="btn btn-secondary" id="prestasi-kegiatan-cancel" style="display: none;">Batal</button>
-                            </div>
-                        </form>
-                        <div class="table-container">
-                            <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama Kegiatan</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="prestasi-kegiatan-tbody">
-                                    <tr>
-                                        <td colspan="3" class="empty-state">Belum ada data nama kegiatan.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
             </div>
         </main>
     </div>
@@ -290,6 +290,6 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="db.js"></script>
-    <script src="master.js?v=2"></script>
+    <script src="master.js?v=3"></script>
 </body>
 </html>
