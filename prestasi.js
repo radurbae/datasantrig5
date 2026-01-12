@@ -1,6 +1,52 @@
 let prestasiData = [];
 let santriData = [];
 let editingId = null;
+let selectedSantriId = null;
+let currentPage = 1;
+const ITEMS_PER_PAGE = 20;
+let labelToIdMap = new Map();
+let idToLabelMap = new Map();
+
+function escapeHtml(value) {
+    return (value || '')
+        .toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function statusClassName(status) {
+    return (status || '').toLowerCase().replace(/\s+/g, '-');
+}
+
+function normalizeKelas(kelas) {
+    return (kelas || '').toString().trim().replace(/\s+/g, ' ');
+}
+
+function parseKelasKey(kelas) {
+    const normalized = normalizeKelas(kelas).replace(/\s+/g, '');
+    const match = normalized.match(/^(\d+)([A-Za-z]+)?$/);
+    if (!match) {
+        return { num: Number.MAX_SAFE_INTEGER, suffix: normalized || 'zz' };
+    }
+    return { num: parseInt(match[1], 10), suffix: (match[2] || '').toUpperCase() };
+}
+
+function compareSantri(a, b) {
+    const aKey = parseKelasKey(a.kelas);
+    const bKey = parseKelasKey(b.kelas);
+    if (aKey.num !== bKey.num) return aKey.num - bKey.num;
+    const suffixCompare = aKey.suffix.localeCompare(bKey.suffix, 'id');
+    if (suffixCompare !== 0) return suffixCompare;
+    const aAbsen = parseInt(a.noAbsen, 10);
+    const bAbsen = parseInt(b.noAbsen, 10);
+    if (!Number.isNaN(aAbsen) && !Number.isNaN(bAbsen) && aAbsen !== bAbsen) {
+        return aAbsen - bAbsen;
+    }
+    return (a.nama || '').localeCompare(b.nama || '', 'id');
+}
 
 function getHijriAcademicYear() {
     try {
@@ -15,12 +61,32 @@ function getHijriAcademicYear() {
     return `${year}-${year + 1}`;
 }
 
-function populateSantriSelect() {
-    const select = document.getElementById('prestasi-santri');
-    if (!select) return;
-    select.innerHTML = '<option value="">Pilih Santri</option>' + santriData.map(s => `
-        <option value="${s.id}">${s.nama} (${s.kelas || '-'})</option>
-    `).join('');
+function buildSantriLabel(santri) {
+    const kelas = santri.kelas || '-';
+    const identity = santri.nomorStambuk || santri.id.slice(0, 8);
+    return `${santri.nama} (${kelas}) - #${identity}`;
+}
+
+function populateSantriDatalist() {
+    const datalist = document.getElementById('prestasi-santri-list');
+    if (!datalist) return;
+    labelToIdMap = new Map();
+    idToLabelMap = new Map();
+    const options = santriData.map(santri => {
+        const label = buildSantriLabel(santri);
+        labelToIdMap.set(label.toLowerCase(), santri.id);
+        idToLabelMap.set(santri.id, label);
+        return `<option value="${escapeHtml(label)}"></option>`;
+    }).join('');
+    datalist.innerHTML = options;
+}
+
+function resolveSantriInput() {
+    const input = document.getElementById('prestasi-santri-input');
+    const hidden = document.getElementById('prestasi-santri');
+    if (!input || !hidden) return;
+    const key = (input.value || '').trim().toLowerCase();
+    hidden.value = labelToIdMap.get(key) || '';
 }
 
 function resetForm() {
@@ -30,56 +96,180 @@ function resetForm() {
     document.getElementById('prestasi-mode').textContent = '';
     document.getElementById('prestasi-cancel').style.display = 'none';
     document.getElementById('prestasi-submit').textContent = 'Simpan';
+    const hidden = document.getElementById('prestasi-santri');
+    if (hidden) hidden.value = '';
 }
 
-function renderTable() {
-    const tbody = document.getElementById('prestasi-tbody');
-    if (!tbody) return;
+function buildPrestasiMap() {
+    const map = new Map();
+    prestasiData.forEach(item => {
+        const list = map.get(item.santri_id) || [];
+        list.push(item);
+        map.set(item.santri_id, list);
+    });
+    return map;
+}
 
-    if (prestasiData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Belum ada data prestasi.</td></tr>';
+function getFilters() {
+    return {
+        search: (document.getElementById('prestasi-search')?.value || '').trim().toLowerCase(),
+        kelas: document.getElementById('prestasi-filter-kelas')?.value || '',
+        status: document.getElementById('prestasi-filter-status')?.value || '',
+        kategori: document.getElementById('prestasi-filter-kategori')?.value || ''
+    };
+}
+
+function filterSantri() {
+    const { search, kelas, status, kategori } = getFilters();
+    const prestasiMap = buildPrestasiMap();
+    return santriData.filter(santri => {
+        const matchesSearch = !search ||
+            (santri.nama && santri.nama.toLowerCase().includes(search)) ||
+            (santri.kelas && santri.kelas.toLowerCase().includes(search)) ||
+            (santri.nomorStambuk && String(santri.nomorStambuk).toLowerCase().includes(search));
+
+        const matchesKelas = !kelas || santri.kelas === kelas;
+        const matchesStatus = !status || santri.status === status;
+        let matchesKategori = true;
+        if (kategori) {
+            const entries = prestasiMap.get(santri.id) || [];
+            matchesKategori = entries.some(entry => entry.kategori_kegiatan === kategori);
+        }
+        return matchesSearch && matchesKelas && matchesStatus && matchesKategori;
+    });
+}
+
+function updateKelasFilter() {
+    const select = document.getElementById('prestasi-filter-kelas');
+    if (!select) return;
+    const current = select.value;
+    const kelasList = [...new Set(santriData.map(s => s.kelas).filter(Boolean))];
+    kelasList.sort((a, b) => {
+        const aKey = parseKelasKey(a);
+        const bKey = parseKelasKey(b);
+        if (aKey.num !== bKey.num) return aKey.num - bKey.num;
+        return aKey.suffix.localeCompare(bKey.suffix, 'id');
+    });
+    select.innerHTML = '<option value="">Semua Kelas</option>' +
+        kelasList.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
+    if (current && kelasList.includes(current)) {
+        select.value = current;
+    }
+}
+
+function renderSantriTable() {
+    const tbody = document.getElementById('prestasi-santri-tbody');
+    if (!tbody) return;
+    const filtered = filterSantri();
+    const totalCount = document.getElementById('prestasi-total-count');
+    if (totalCount) {
+        totalCount.textContent = `Total: ${filtered.length} santri`;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const items = filtered.slice(start, start + ITEMS_PER_PAGE);
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada data santri.</td></tr>';
+    } else {
+        tbody.innerHTML = items.map((santri, index) => {
+            const statusClass = `badge-${statusClassName(santri.status)}`;
+            return `
+            <tr>
+                <td>${start + index + 1}</td>
+                <td>${escapeHtml(santri.nama || '-')}</td>
+                <td>${escapeHtml(santri.kelas || '-')}</td>
+                <td><span class="badge ${statusClass}">${escapeHtml(santri.status || '-')}</span></td>
+                <td>
+                    <button class="btn btn-info" data-action="detail" data-id="${santri.id}">Detail</button>
+                </td>
+            </tr>
+            `;
+        }).join('');
+    }
+
+    const pageInfo = document.getElementById('prestasi-page-info');
+    if (pageInfo) pageInfo.textContent = `Halaman ${currentPage}`;
+    const prev = document.getElementById('prestasi-prev');
+    const next = document.getElementById('prestasi-next');
+    if (prev) prev.disabled = currentPage <= 1;
+    if (next) next.disabled = currentPage >= totalPages;
+
+    if (selectedSantriId) {
+        const stillVisible = filtered.some(s => s.id === selectedSantriId);
+        if (!stillVisible) {
+            hideDetail();
+        } else {
+            renderDetail();
+        }
+    }
+}
+
+function renderDetail() {
+    const section = document.getElementById('prestasi-detail-section');
+    const tbody = document.getElementById('prestasi-detail-tbody');
+    if (!section || !tbody || !selectedSantriId) return;
+
+    const santri = santriData.find(s => s.id === selectedSantriId);
+    if (!santri) return;
+
+    const { kategori } = getFilters();
+    let entries = prestasiData.filter(item => item.santri_id === selectedSantriId);
+    if (kategori) {
+        entries = entries.filter(item => item.kategori_kegiatan === kategori);
+    }
+
+    document.getElementById('prestasi-detail-title').textContent = `Detail Prestasi - ${santri.nama || '-'}`;
+    document.getElementById('prestasi-detail-subtitle').textContent = `Kelas ${santri.kelas || '-'}`;
+    section.style.display = 'block';
+
+    const isAdmin = window.currentUserRole === 'admin';
+    const actionHeader = document.getElementById('prestasi-detail-aksi');
+    if (actionHeader) {
+        actionHeader.style.display = isAdmin ? '' : 'none';
+    }
+
+    if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada data prestasi untuk santri ini.</td></tr>';
         return;
     }
 
-    const isAdmin = window.currentUserRole === 'admin';
-    tbody.innerHTML = prestasiData.map((item, index) => `
+    tbody.innerHTML = entries.map((item, index) => `
         <tr>
             <td>${index + 1}</td>
-            <td>${item.santri_name || '-'}</td>
-            <td>${item.nama_kegiatan || '-'}</td>
-            <td>${item.keterangan || '-'}</td>
-            <td>${item.kategori_kegiatan || '-'}</td>
-            <td>${item.tahun_ajaran || '-'}</td>
-            ${isAdmin ? `
-            <td>
-                <button class="btn btn-secondary" onclick="editPrestasi('${item.id}')">Edit</button>
-                <button class="btn btn-danger" onclick="deletePrestasiItem('${item.id}')">Hapus</button>
+            <td>${escapeHtml(item.nama_kegiatan || '-')}</td>
+            <td>${escapeHtml(item.keterangan || '-')}</td>
+            <td>${escapeHtml(item.kategori_kegiatan || '-')}</td>
+            <td>${escapeHtml(item.tahun_ajaran || '-')}</td>
+            <td style="${isAdmin ? '' : 'display:none;'}">
+                <button class="btn btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
+                <button class="btn btn-danger" data-action="delete" data-id="${item.id}">Hapus</button>
             </td>
-            ` : ''}
         </tr>
     `).join('');
 }
 
-function attachSantriNames() {
-    const map = new Map(santriData.map(s => [s.id, s]));
-    prestasiData = prestasiData.map(item => ({
-        ...item,
-        santri_name: map.get(item.santri_id)?.nama || '-'
-    }));
+function hideDetail() {
+    const section = document.getElementById('prestasi-detail-section');
+    if (section) section.style.display = 'none';
+    selectedSantriId = null;
 }
 
 async function loadData() {
     santriData = await getAllSantri();
     prestasiData = await getPrestasi();
-    attachSantriNames();
-    populateSantriSelect();
-    renderTable();
+    santriData.sort(compareSantri);
+    populateSantriDatalist();
+    updateKelasFilter();
+    renderSantriTable();
 }
 
-window.editPrestasi = (id) => {
-    const item = prestasiData.find(p => p.id === id);
-    if (!item) return;
-    editingId = id;
+function setFormFromItem(item) {
+    editingId = item.id;
+    const label = idToLabelMap.get(item.santri_id) || '';
+    document.getElementById('prestasi-santri-input').value = label;
     document.getElementById('prestasi-santri').value = item.santri_id;
     document.getElementById('prestasi-kegiatan').value = item.nama_kegiatan || '';
     document.getElementById('prestasi-keterangan').value = item.keterangan || '';
@@ -88,21 +278,50 @@ window.editPrestasi = (id) => {
     document.getElementById('prestasi-mode').textContent = 'Mode: Edit';
     document.getElementById('prestasi-cancel').style.display = 'inline-flex';
     document.getElementById('prestasi-submit').textContent = 'Update';
-};
+}
 
-window.deletePrestasiItem = async (id) => {
+async function deletePrestasiItem(id) {
     if (!confirm('Hapus data prestasi ini?')) return;
     const success = await deletePrestasi(id);
     if (success) {
         await loadData();
+        renderDetail();
     }
-};
+}
+
+function handleTableClick(event) {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const id = button.getAttribute('data-id');
+    const action = button.getAttribute('data-action');
+    if (!id || !action) return;
+
+    if (action === 'detail') {
+        selectedSantriId = id;
+        renderDetail();
+        return;
+    }
+
+    if (action === 'edit') {
+        const item = prestasiData.find(p => p.id === id);
+        if (item) {
+            setFormFromItem(item);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
+    }
+
+    if (action === 'delete') {
+        deletePrestasiItem(id);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     const role = await requireAuth();
     if (!role) return;
 
     document.getElementById('prestasi-tahun').value = getHijriAcademicYear();
+
     if (role !== 'admin') {
         document.getElementById('prestasi-form').style.display = 'none';
         document.getElementById('prestasi-readonly').style.display = 'block';
@@ -111,11 +330,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
 
     document.getElementById('prestasi-cancel').addEventListener('click', resetForm);
+    document.getElementById('prestasi-santri-input').addEventListener('input', () => {
+        const hidden = document.getElementById('prestasi-santri');
+        if (hidden) hidden.value = '';
+    });
+    document.getElementById('prestasi-santri-input').addEventListener('change', resolveSantriInput);
+    document.getElementById('prestasi-santri-input').addEventListener('blur', resolveSantriInput);
 
     document.getElementById('prestasi-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (role !== 'admin') return;
 
+        resolveSantriInput();
         const payload = {
             santri_id: document.getElementById('prestasi-santri').value,
             nama_kegiatan: document.getElementById('prestasi-kegiatan').value.trim(),
@@ -125,7 +351,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         if (!payload.santri_id || !payload.nama_kegiatan || !payload.keterangan || !payload.kategori_kegiatan || !payload.tahun_ajaran) {
-            alert('Lengkapi semua field.');
+            alert('Lengkapi semua field dengan memilih santri dari daftar.');
             return;
         }
 
@@ -137,4 +363,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadData();
         resetForm();
     });
+
+    document.getElementById('prestasi-search').addEventListener('input', () => {
+        currentPage = 1;
+        renderSantriTable();
+    });
+    document.getElementById('prestasi-filter-kelas').addEventListener('change', () => {
+        currentPage = 1;
+        renderSantriTable();
+    });
+    document.getElementById('prestasi-filter-status').addEventListener('change', () => {
+        currentPage = 1;
+        renderSantriTable();
+    });
+    document.getElementById('prestasi-filter-kategori').addEventListener('change', () => {
+        currentPage = 1;
+        renderSantriTable();
+    });
+
+    document.getElementById('prestasi-prev').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage -= 1;
+            renderSantriTable();
+        }
+    });
+    document.getElementById('prestasi-next').addEventListener('click', () => {
+        currentPage += 1;
+        renderSantriTable();
+    });
+
+    document.getElementById('prestasi-santri-tbody').addEventListener('click', handleTableClick);
+    document.getElementById('prestasi-detail-tbody').addEventListener('click', handleTableClick);
+    document.getElementById('prestasi-detail-close').addEventListener('click', hideDetail);
 });

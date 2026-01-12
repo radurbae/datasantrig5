@@ -49,8 +49,12 @@
                         <form id="prestasi-form" class="report-form" data-admin-only>
                             <div class="report-grid">
                                 <div class="form-group">
-                                    <label for="prestasi-santri">Pilih Santri</label>
-                                    <select id="prestasi-santri" required></select>
+                                    <label for="prestasi-santri-input">Pilih Santri</label>
+                                    <div class="searchable-select">
+                                        <input type="text" id="prestasi-santri-input" list="prestasi-santri-list" placeholder="Ketik nama santri" required>
+                                        <datalist id="prestasi-santri-list"></datalist>
+                                        <input type="hidden" id="prestasi-santri">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="prestasi-kegiatan">Nama Kegiatan</label>
@@ -82,7 +86,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="prestasi-tahun">Tahun Ajaran (Hijriah)</label>
-                                    <input type="text" id="prestasi-tahun" required>
+                                    <input type="text" id="prestasi-tahun" required readonly>
                                 </div>
                             </div>
                             <div class="form-actions">
@@ -96,27 +100,94 @@
                     </div>
                 </section>
 
-                <section class="overview-section">
+                <section class="search-section">
+                    <div class="search-card">
+                        <div class="search-row">
+                            <div class="search-group">
+                                <input type="text" id="prestasi-search" placeholder="🔍 Cari santri (nama, kelas, stambuk...)" class="search-input">
+                            </div>
+                            <div class="filter-group">
+                                <select id="prestasi-filter-kelas" class="filter-select">
+                                    <option value="">Semua Kelas</option>
+                                </select>
+                                <select id="prestasi-filter-status" class="filter-select">
+                                    <option value="">Semua Status</option>
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Mengundurkan Diri">Mengundurkan Diri</option>
+                                    <option value="Istirahat">Istirahat</option>
+                                    <option value="Skorsing">Skorsing</option>
+                                    <option value="Pindah Kampus">Pindah Kampus</option>
+                                    <option value="Dikeluarkan">Dikeluarkan</option>
+                                </select>
+                                <select id="prestasi-filter-kategori" class="filter-select">
+                                    <option value="">Semua Kategori</option>
+                                    <option value="OPPM">OPPM</option>
+                                    <option value="KGGP">KGGP</option>
+                                    <option value="Instansi">Instansi</option>
+                                    <option value="KMI">KMI</option>
+                                    <option value="Antar Kampus">Antar Kampus</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="stats">
+                            <span id="prestasi-total-count">Total: 0 santri</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="table-section">
+                    <div class="table-card">
+                        <h2>Daftar Santri</h2>
+                        <div class="table-container">
+                            <table id="prestasi-santri-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Kelas</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prestasi-santri-tbody">
+                                    <tr>
+                                        <td colspan="5" class="empty-state">Belum ada data santri.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="btn btn-secondary" id="prestasi-prev">Sebelumnya</button>
+                            <span id="prestasi-page-info">Halaman 1</span>
+                            <button class="btn btn-secondary" id="prestasi-next">Berikutnya</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="overview-section" id="prestasi-detail-section" style="display: none;">
                     <div class="overview-card">
-                        <div class="overview-header">
-                            <h2>Daftar Prestasi</h2>
+                        <div class="detail-header">
+                            <div>
+                                <h2 id="prestasi-detail-title">Detail Prestasi</h2>
+                                <p class="subtitle" id="prestasi-detail-subtitle"></p>
+                            </div>
+                            <button class="btn btn-secondary" id="prestasi-detail-close">Tutup</button>
                         </div>
                         <div class="table-container">
                             <table class="report-table">
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Nama</th>
                                         <th>Kegiatan</th>
                                         <th>Keterangan</th>
                                         <th>Kategori</th>
                                         <th>Tahun Ajaran</th>
-                                        <th data-admin-only>Aksi</th>
+                                        <th id="prestasi-detail-aksi">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="prestasi-tbody">
+                                <tbody id="prestasi-detail-tbody">
                                     <tr>
-                                        <td colspan="7" class="empty-state">Belum ada data prestasi.</td>
+                                        <td colspan="6" class="empty-state">Belum ada data prestasi untuk santri ini.</td>
                                     </tr>
                                 </tbody>
                             </table>
