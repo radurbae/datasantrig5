@@ -373,7 +373,8 @@ body {
 }
 
 .report-table thead th {
-    background: #f1f5f9;
+    background: var(--primary-color);
+    color: #fff;
     text-align: left;
 }
 
@@ -407,6 +408,17 @@ body {
 .status-pending {
     background: #fee2e2;
     color: #991b1b;
+}
+
+#download-all,
+#download-class {
+    background-color: var(--success-color);
+    color: #fff;
+}
+
+#download-all:hover,
+#download-class:hover {
+    background-color: #059669;
 }
 
 .predikat-pill {
