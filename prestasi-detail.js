@@ -60,7 +60,7 @@ async function loadMasterData() {
 function populatePrestasiSelects() {
     const kategoriSelect = document.getElementById('prestasi-kategori');
     const keteranganSelect = document.getElementById('prestasi-keterangan');
-    const kegiatanList = document.getElementById('prestasi-kegiatan-list');
+    const kegiatanSelect = document.getElementById('prestasi-kegiatan');
 
     if (kategoriSelect) {
         const current = kategoriSelect.value;
@@ -80,10 +80,13 @@ function populatePrestasiSelects() {
         }
     }
 
-    if (kegiatanList) {
-        kegiatanList.innerHTML = prestasiKegiatanOptions.map(item => `
-            <option value="${escapeHtml(item)}"></option>
-        `).join('');
+    if (kegiatanSelect) {
+        const current = kegiatanSelect.value;
+        kegiatanSelect.innerHTML = '<option value="">Pilih Nama Kegiatan</option>' +
+            prestasiKegiatanOptions.map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join('');
+        if (current && prestasiKegiatanOptions.includes(current)) {
+            kegiatanSelect.value = current;
+        }
     }
 }
 
@@ -258,9 +261,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         if (role !== 'admin') return;
 
+        if (!confirm('Apakah data ini sudah benar?')) return;
+
         const payload = {
             santri_id: santriId,
-            nama_kegiatan: document.getElementById('prestasi-kegiatan').value.trim(),
+            nama_kegiatan: document.getElementById('prestasi-kegiatan').value,
             keterangan: document.getElementById('prestasi-keterangan').value,
             kategori_kegiatan: document.getElementById('prestasi-kategori').value,
             tahun_ajaran: document.getElementById('prestasi-tahun').value.trim()
@@ -271,12 +276,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        if (editingId) {
-            await updatePrestasi(editingId, payload);
-        } else {
-            await insertPrestasi(payload);
+        if (!prestasiKegiatanOptions.length) {
+            alert('Daftar nama kegiatan belum diisi. Tambahkan di Master Data.');
+            return;
         }
-        await loadData();
-        resetForm();
+
+        let success = false;
+        if (editingId) {
+            success = !!(await updatePrestasi(editingId, payload));
+        } else {
+            success = !!(await insertPrestasi(payload));
+        }
+
+        if (success) {
+            alert('Data prestasi berhasil disimpan.');
+            await loadData();
+            resetForm();
+        } else {
+            alert('Data prestasi gagal disimpan.');
+        }
     });
 });
