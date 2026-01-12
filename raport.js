@@ -444,27 +444,41 @@ function renderSantriList(kelas) {
     if (subtitle) subtitle.textContent = `Bulan ${viewMonthValue}`;
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada data.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada data.</td></tr>';
         return;
     }
     const reportMap = new Map(reportData.map(r => [r.santri_id, r]));
-    tbody.innerHTML = filtered.map((s, index) => `
+    tbody.innerHTML = filtered.map((s, index) => {
+        const report = reportMap.get(s.id);
+        let totalPoints = 0;
+        RAPORT_CATEGORIES.forEach(cat => {
+            const value = report ? report[`${cat.key}_score`] : null;
+            if (typeof value === 'number') {
+                totalPoints += value;
+            }
+        });
+        const totalPredicate = getTotalPredicate(totalPoints);
+        const statusText = isReportComplete(report) ? 'Sudah' : 'Belum';
+        const statusClass = isReportComplete(report) ? 'status-done' : 'status-pending';
+        return `
         <tr>
             <td>${index + 1}</td>
             <td>${s.nama}</td>
             <td>${s.noAbsen ?? '-'}</td>
             <td>
-                <span class="status-pill ${isReportComplete(reportMap.get(s.id)) ? 'status-done' : 'status-pending'}">
-                    ${isReportComplete(reportMap.get(s.id)) ? 'Sudah' : 'Belum'}
+                <span class="status-pill ${statusClass}">
+                    ${statusText}
                 </span>
             </td>
+            <td>${totalPredicate || '-'}</td>
             <td>
                 <a class="btn btn-secondary" href="raport.html?kelas=${encodeURIComponent(kelas)}&santri=${s.id}">
-                    ${reportMap.get(s.id) ? 'Edit' : 'Input'}
+                    ${report ? 'Edit' : 'Input'}
                 </a>
             </td>
         </tr>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderForm(santriId, kelas) {
