@@ -1,7 +1,6 @@
 let prestasiData = [];
 let santriData = [];
 let editingId = null;
-let selectedSantriId = null;
 let currentPage = 1;
 const ITEMS_PER_PAGE = 20;
 let labelToIdMap = new Map();
@@ -196,65 +195,6 @@ function renderSantriTable() {
     const next = document.getElementById('prestasi-next');
     if (prev) prev.disabled = currentPage <= 1;
     if (next) next.disabled = currentPage >= totalPages;
-
-    if (selectedSantriId) {
-        const stillVisible = filtered.some(s => s.id === selectedSantriId);
-        if (!stillVisible) {
-            hideDetail();
-        } else {
-            renderDetail();
-        }
-    }
-}
-
-function renderDetail() {
-    const section = document.getElementById('prestasi-detail-section');
-    const tbody = document.getElementById('prestasi-detail-tbody');
-    if (!section || !tbody || !selectedSantriId) return;
-
-    const santri = santriData.find(s => s.id === selectedSantriId);
-    if (!santri) return;
-
-    const { kategori } = getFilters();
-    let entries = prestasiData.filter(item => item.santri_id === selectedSantriId);
-    if (kategori) {
-        entries = entries.filter(item => item.kategori_kegiatan === kategori);
-    }
-
-    document.getElementById('prestasi-detail-title').textContent = `Detail Prestasi - ${santri.nama || '-'}`;
-    document.getElementById('prestasi-detail-subtitle').textContent = `Kelas ${santri.kelas || '-'}`;
-    section.style.display = 'block';
-
-    const isAdmin = window.currentUserRole === 'admin';
-    const actionHeader = document.getElementById('prestasi-detail-aksi');
-    if (actionHeader) {
-        actionHeader.style.display = isAdmin ? '' : 'none';
-    }
-
-    if (entries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada data prestasi untuk santri ini.</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = entries.map((item, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${escapeHtml(item.nama_kegiatan || '-')}</td>
-            <td>${escapeHtml(item.keterangan || '-')}</td>
-            <td>${escapeHtml(item.kategori_kegiatan || '-')}</td>
-            <td>${escapeHtml(item.tahun_ajaran || '-')}</td>
-            <td style="${isAdmin ? '' : 'display:none;'}">
-                <button class="btn btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
-                <button class="btn btn-danger" data-action="delete" data-id="${item.id}">Hapus</button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function hideDetail() {
-    const section = document.getElementById('prestasi-detail-section');
-    if (section) section.style.display = 'none';
-    selectedSantriId = null;
 }
 
 async function loadData() {
@@ -280,15 +220,6 @@ function setFormFromItem(item) {
     document.getElementById('prestasi-submit').textContent = 'Update';
 }
 
-async function deletePrestasiItem(id) {
-    if (!confirm('Hapus data prestasi ini?')) return;
-    const success = await deletePrestasi(id);
-    if (success) {
-        await loadData();
-        renderDetail();
-    }
-}
-
 function handleTableClick(event) {
     const button = event.target.closest('button');
     if (!button) return;
@@ -297,8 +228,7 @@ function handleTableClick(event) {
     if (!id || !action) return;
 
     if (action === 'detail') {
-        selectedSantriId = id;
-        renderDetail();
+        window.location.href = `prestasi-detail.html?santri=${encodeURIComponent(id)}`;
         return;
     }
 
@@ -308,11 +238,6 @@ function handleTableClick(event) {
             setFormFromItem(item);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        return;
-    }
-
-    if (action === 'delete') {
-        deletePrestasiItem(id);
     }
 }
 
@@ -393,6 +318,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('prestasi-santri-tbody').addEventListener('click', handleTableClick);
-    document.getElementById('prestasi-detail-tbody').addEventListener('click', handleTableClick);
-    document.getElementById('prestasi-detail-close').addEventListener('click', hideDetail);
 });

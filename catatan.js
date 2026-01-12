@@ -1,7 +1,6 @@
 let catatanData = [];
 let santriData = [];
 let editingId = null;
-let selectedSantriId = null;
 let currentPage = 1;
 const ITEMS_PER_PAGE = 20;
 let labelToIdMap = new Map();
@@ -228,65 +227,6 @@ function renderSantriTable() {
     const next = document.getElementById('catatan-next');
     if (prev) prev.disabled = currentPage <= 1;
     if (next) next.disabled = currentPage >= totalPages;
-
-    if (selectedSantriId) {
-        const stillVisible = filtered.some(s => s.id === selectedSantriId);
-        if (!stillVisible) {
-            hideDetail();
-        } else {
-            renderDetail();
-        }
-    }
-}
-
-function renderDetail() {
-    const section = document.getElementById('catatan-detail-section');
-    const tbody = document.getElementById('catatan-detail-tbody');
-    if (!section || !tbody || !selectedSantriId) return;
-
-    const santri = santriData.find(s => s.id === selectedSantriId);
-    if (!santri) return;
-
-    const { kategori } = getFilters();
-    let entries = catatanData.filter(item => item.santri_id === selectedSantriId);
-    if (kategori) {
-        entries = entries.filter(item => item.kategori === kategori);
-    }
-
-    document.getElementById('catatan-detail-title').textContent = `Detail Catatan - ${santri.nama || '-'}`;
-    document.getElementById('catatan-detail-subtitle').textContent = `Kelas ${santri.kelas || '-'}`;
-    section.style.display = 'block';
-
-    const isAdmin = window.currentUserRole === 'admin';
-    const actionHeader = document.getElementById('catatan-detail-aksi');
-    if (actionHeader) {
-        actionHeader.style.display = isAdmin ? '' : 'none';
-    }
-
-    if (entries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada data catatan untuk santri ini.</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = entries.map((item, index) => `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${escapeHtml(item.kategori || '-')}</td>
-            <td>${escapeHtml(item.sub_kategori || '-')}</td>
-            <td>${escapeHtml(item.keterangan || '-')}</td>
-            <td>${escapeHtml(item.tahun_ajaran || '-')}</td>
-            <td style="${isAdmin ? '' : 'display:none;'}">
-                <button class="btn btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
-                <button class="btn btn-danger" data-action="delete" data-id="${item.id}">Hapus</button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function hideDetail() {
-    const section = document.getElementById('catatan-detail-section');
-    if (section) section.style.display = 'none';
-    selectedSantriId = null;
 }
 
 async function loadData() {
@@ -314,15 +254,6 @@ function setFormFromItem(item) {
     document.getElementById('catatan-submit').textContent = 'Update';
 }
 
-async function deleteCatatanItem(id) {
-    if (!confirm('Hapus data catatan ini?')) return;
-    const success = await deleteCatatan(id);
-    if (success) {
-        await loadData();
-        renderDetail();
-    }
-}
-
 function handleTableClick(event) {
     const button = event.target.closest('button');
     if (!button) return;
@@ -331,8 +262,7 @@ function handleTableClick(event) {
     if (!id || !action) return;
 
     if (action === 'detail') {
-        selectedSantriId = id;
-        renderDetail();
+        window.location.href = `catatan-detail.html?santri=${encodeURIComponent(id)}`;
         return;
     }
 
@@ -342,11 +272,6 @@ function handleTableClick(event) {
             setFormFromItem(item);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        return;
-    }
-
-    if (action === 'delete') {
-        deleteCatatanItem(id);
     }
 }
 
@@ -430,6 +355,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('catatan-santri-tbody').addEventListener('click', handleTableClick);
-    document.getElementById('catatan-detail-tbody').addEventListener('click', handleTableClick);
-    document.getElementById('catatan-detail-close').addEventListener('click', hideDetail);
 });
