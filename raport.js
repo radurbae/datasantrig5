@@ -154,6 +154,9 @@ function buildExportRows(targetSantri) {
             }
         });
         const totalPredicate = getTotalPredicate(totalPoints);
+        const predikatClass = totalPredicate
+            ? `predikat-pill predikat-${totalPredicate.toLowerCase()}`
+            : 'predikat-pill';
         const cells = [
             index + 1,
             s.nama || '-',
@@ -470,7 +473,7 @@ function renderSantriList(kelas) {
                     ${statusText}
                 </span>
             </td>
-            <td>${totalPredicate || '-'}</td>
+            <td><span class="${predikatClass}">${totalPredicate || '-'}</span></td>
             <td>
                 <a class="btn btn-secondary" href="raport.html?kelas=${encodeURIComponent(kelas)}&santri=${s.id}">
                     ${report ? 'Edit' : 'Input'}

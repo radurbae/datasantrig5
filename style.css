@@ -377,6 +377,19 @@ body {
     text-align: left;
 }
 
+.report-table tbody tr {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.report-table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.report-table tbody tr td {
+    border-bottom: 1px solid #e2e8f0;
+}
+
 .status-pill {
     display: inline-flex;
     align-items: center;
@@ -394,6 +407,34 @@ body {
 .status-pending {
     background: #fee2e2;
     color: #991b1b;
+}
+
+.predikat-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.predikat-baik {
+    color: #166534;
+    background: #dcfce7;
+    border-color: #86efac;
+}
+
+.predikat-sedang {
+    color: #92400e;
+    background: #fef3c7;
+    border-color: #fcd34d;
+}
+
+.predikat-kurang {
+    color: #991b1b;
+    background: #fee2e2;
+    border-color: #fca5a5;
 }
 
 .report-form {
@@ -826,6 +867,15 @@ header.page-header h1 {
 
 .btn-secondary:hover {
     background-color: #475569;
+}
+
+.report-table .btn {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.report-table .btn:hover {
+    background-color: var(--primary-hover);
 }
 
 .btn-success {
