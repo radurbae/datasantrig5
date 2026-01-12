@@ -305,6 +305,166 @@ async function deleteSantriById(id) {
     }
 }
 
+// Prestasi Santri
+async function getPrestasi() {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('prestasi_santri')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) {
+            console.error('Error fetching prestasi:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getPrestasi:', error);
+        return [];
+    }
+}
+
+async function insertPrestasi(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('prestasi_santri')
+            .insert([payload])
+            .select()
+            .single();
+        if (error) {
+            console.error('Error inserting prestasi:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in insertPrestasi:', error);
+        return null;
+    }
+}
+
+async function updatePrestasi(id, payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('prestasi_santri')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) {
+            console.error('Error updating prestasi:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in updatePrestasi:', error);
+        return null;
+    }
+}
+
+async function deletePrestasi(id) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return false;
+        const { error } = await client
+            .from('prestasi_santri')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            console.error('Error deleting prestasi:', error);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error in deletePrestasi:', error);
+        return false;
+    }
+}
+
+// Catatan Santri
+async function getCatatan() {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return [];
+        const { data, error } = await client
+            .from('catatan_santri')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) {
+            console.error('Error fetching catatan:', error);
+            return [];
+        }
+        return data || [];
+    } catch (error) {
+        console.error('Error in getCatatan:', error);
+        return [];
+    }
+}
+
+async function insertCatatan(payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('catatan_santri')
+            .insert([payload])
+            .select()
+            .single();
+        if (error) {
+            console.error('Error inserting catatan:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in insertCatatan:', error);
+        return null;
+    }
+}
+
+async function updateCatatan(id, payload) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return null;
+        const { data, error } = await client
+            .from('catatan_santri')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+        if (error) {
+            console.error('Error updating catatan:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error in updateCatatan:', error);
+        return null;
+    }
+}
+
+async function deleteCatatan(id) {
+    try {
+        const client = getSupabaseClient();
+        if (!client) return false;
+        const { error } = await client
+            .from('catatan_santri')
+            .delete()
+            .eq('id', id);
+        if (error) {
+            console.error('Error deleting catatan:', error);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Error in deleteCatatan:', error);
+        return false;
+    }
+}
+
 /**
  * Convert Supabase data (snake_case) to app format (camelCase)
  * @param {Object} supabaseData - Data from Supabase

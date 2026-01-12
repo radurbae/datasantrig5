@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Santri - Database Santri PMDG Kampus 5 Darul Qiyam</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-row">
+                    <h2>📚 Database Santri</h2>
+                    <button class="sidebar-toggle" type="button" aria-label="Toggle menu">☰</button>
+                </div>
+                <span>PMDG Kampus 5 Darul Qiyam</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="overview.html" class="sidebar-link">📊 Overview</a>
+                <a href="form.html" class="sidebar-link" data-admin-only>➕ Input Data</a>
+                <a href="list.html" class="sidebar-link">📋 List Data</a>
+                <a href="raport.html" class="sidebar-link">📝 Raport Mental</a>
+                <a href="prestasi.html" class="sidebar-link">🏆 Prestasi</a>
+                <a href="catatan.html" class="sidebar-link active">🗒️ Catatan</a>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="nav-role" data-role-label></span>
+                <a href="login.html" class="sidebar-link nav-logout" data-logout>Keluar</a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="content-wrap">
+                <header class="page-header">
+                    <h1>Catatan Santri</h1>
+                    <p class="subtitle">Catatan kegiatan dan organisasi santri</p>
+                </header>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Input Catatan</h2>
+                            <span class="overview-total" id="catatan-mode"></span>
+                        </div>
+                        <form id="catatan-form" class="report-form" data-admin-only>
+                            <div class="report-grid">
+                                <div class="form-group">
+                                    <label for="catatan-santri">Pilih Santri</label>
+                                    <select id="catatan-santri" required></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="catatan-kategori">Kategori</label>
+                                    <select id="catatan-kategori" required>
+                                        <option value="">Pilih Kategori</option>
+                                        <option value="OPPM">OPPM</option>
+                                        <option value="KGGP">KGGP</option>
+                                        <option value="Instansi">Instansi</option>
+                                        <option value="KMI">KMI</option>
+                                        <option value="Kepanitiaan">Kepanitiaan</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="catatan-subkategori">Sub Kategori</label>
+                                    <select id="catatan-subkategori" required></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="catatan-keterangan">Keterangan</label>
+                                    <input type="text" id="catatan-keterangan" placeholder="Keterangan catatan" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="catatan-tahun">Tahun Ajaran (Hijriah)</label>
+                                    <input type="text" id="catatan-tahun" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="catatan-submit">Simpan</button>
+                                <button type="button" class="btn btn-secondary" id="catatan-cancel" style="display: none;">Batal</button>
+                            </div>
+                        </form>
+                        <div class="overview-empty" id="catatan-readonly" style="display: none;">
+                            Hanya admin yang dapat menambah atau mengubah data catatan.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2>Daftar Catatan</h2>
+                        </div>
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Kategori</th>
+                                        <th>Sub Kategori</th>
+                                        <th>Keterangan</th>
+                                        <th>Tahun Ajaran</th>
+                                        <th data-admin-only>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catatan-tbody">
+                                    <tr>
+                                        <td colspan="7" class="empty-state">Belum ada data catatan.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="db.js"></script>
+    <script src="catatan.js"></script>
+</body>
+</html>

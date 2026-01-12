@@ -391,6 +391,27 @@ body {
     border-bottom: 1px solid #e2e8f0;
 }
 
+.report-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.report-form .form-group input,
+.report-form .form-group select {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+}
+
+.report-form .form-group input:focus,
+.report-form .form-group select:focus {
+    outline: none;
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
 .status-pill {
     display: inline-flex;
     align-items: center;

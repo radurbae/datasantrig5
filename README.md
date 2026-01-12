@@ -234,6 +234,111 @@ CREATE UNIQUE INDEX IF NOT EXISTS raport_mental_unique
 ON raport_mental (santri_id, month);
 ```
 
+## 🏆 Prestasi Santri
+
+Tambahkan tabel prestasi dengan SQL berikut:
+
+```sql
+CREATE TABLE IF NOT EXISTS prestasi_santri (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  santri_id UUID REFERENCES santri(id) ON DELETE CASCADE NOT NULL,
+  nama_kegiatan TEXT NOT NULL,
+  keterangan TEXT NOT NULL,
+  kategori_kegiatan TEXT NOT NULL,
+  tahun_ajaran TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+Tambahkan policy RLS untuk tabel `prestasi_santri`:
+
+```sql
+ALTER TABLE prestasi_santri ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Prestasi viewable by authenticated users"
+ON prestasi_santri FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Admins can insert prestasi"
+ON prestasi_santri FOR INSERT
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins can update prestasi"
+ON prestasi_santri FOR UPDATE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins can delete prestasi"
+ON prestasi_santri FOR DELETE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+```
+
+## 🗒️ Catatan Santri
+
+Tambahkan tabel catatan dengan SQL berikut:
+
+```sql
+CREATE TABLE IF NOT EXISTS catatan_santri (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  santri_id UUID REFERENCES santri(id) ON DELETE CASCADE NOT NULL,
+  kategori TEXT NOT NULL,
+  sub_kategori TEXT NOT NULL,
+  keterangan TEXT NOT NULL,
+  tahun_ajaran TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+Tambahkan policy RLS untuk tabel `catatan_santri`:
+
+```sql
+ALTER TABLE catatan_santri ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Catatan viewable by authenticated users"
+ON catatan_santri FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Admins can insert catatan"
+ON catatan_santri FOR INSERT
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins can update catatan"
+ON catatan_santri FOR UPDATE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+
+CREATE POLICY "Admins can delete catatan"
+ON catatan_santri FOR DELETE
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles p
+    WHERE p.id = auth.uid() AND p.role = 'admin'
+  )
+);
+```
 Tambahkan policy RLS untuk tabel `raport_mental`:
 
 ```sql
