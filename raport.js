@@ -43,6 +43,15 @@ function normalizeKelas(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
 }
 
+function escapeCell(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function parseKelasKey(kelas) {
     const normalized = normalizeKelas(kelas).replace(/\s+/g, '');
     const match = normalized.match(/^(\d+)([A-Za-z]+)?$/);
@@ -69,6 +78,63 @@ function isReportComplete(report) {
         const score = report[`${cat.key}_score`];
         const note = report[`${cat.key}_note`];
         return score && note;
+    });
+}
+
+function exportToExcel(rows, filename) {
+    const header = [
+        'No',
+        'Nama',
+        'Kelas',
+        'No Absen',
+        'Bulan',
+        'Status Raport',
+        ...RAPORT_CATEGORIES.flatMap(cat => [`${cat.label} (Skor)`, `${cat.label} (Alasan)`])
+    ];
+
+    const tableRows = [
+        `<tr>${header.map(col => `<th>${escapeCell(col)}</th>`).join('')}</tr>`,
+        ...rows.map(row => `<tr>${row.map(cell => `<td>${escapeCell(cell)}</td>`).join('')}</tr>`)
+    ].join('');
+
+    const html = `
+        <html>
+            <head><meta charset="UTF-8"></head>
+            <body>
+                <table>${tableRows}</table>
+            </body>
+        </html>
+    `;
+
+    const blob = new Blob([`\ufeff${html}`], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+function buildExportRows(targetSantri) {
+    const reportMap = new Map(reportData.map(r => [r.santri_id, r]));
+    return targetSantri.map((s, index) => {
+        const report = reportMap.get(s.id);
+        const status = isReportComplete(report) ? 'Sudah' : 'Belum';
+        const cells = [
+            index + 1,
+            s.nama || '-',
+            normalizeKelas(s.kelas) || '-',
+            s.noAbsen ?? '-',
+            viewMonthValue,
+            status
+        ];
+        RAPORT_CATEGORIES.forEach(cat => {
+            cells.push(report ? report[`${cat.key}_score`] ?? '' : '');
+            cells.push(report ? report[`${cat.key}_note`] ?? '' : '');
+        });
+        return cells;
     });
 }
 
@@ -417,6 +483,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('raport-classes').style.display = 'none';
         document.getElementById('raport-form-section').style.display = 'block';
         renderForm(santriId, kelas);
+    }
+
+    const downloadAllBtn = document.getElementById('download-all');
+    if (downloadAllBtn) {
+        downloadAllBtn.addEventListener('click', () => {
+            const rows = buildExportRows(santriData);
+            const filename = `raport-mental-${viewMonthValue}-semua.xls`;
+            exportToExcel(rows, filename);
+        });
+    }
+
+    const downloadClassBtn = document.getElementById('download-class');
+    if (downloadClassBtn) {
+        downloadClassBtn.addEventListener('click', () => {
+            if (!kelas) return;
+            const target = santriData.filter(s => normalizeKelas(s.kelas) === kelas);
+            const safeKelas = normalizeKelas(kelas).replace(/\s+/g, '-');
+            const filename = `raport-mental-${viewMonthValue}-${safeKelas}.xls`;
+            exportToExcel(buildExportRows(target), filename);
+        });
     }
 
     const form = document.getElementById('raport-form');
