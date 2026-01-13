@@ -530,11 +530,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             santri_id: document.getElementById('catatan-santri').value,
             kategori,
             sub_kategori: document.getElementById('catatan-subkategori').value,
-            keterangan: getKeteranganValue(kategori),
+            keterangan: getKeteranganValue(kategori) || null,
             tahun_ajaran: document.getElementById('catatan-tahun').value.trim()
         };
 
-        if (!payload.santri_id || !payload.kategori || !payload.sub_kategori || !payload.keterangan || !payload.tahun_ajaran) {
+        if (!payload.santri_id || !payload.kategori || !payload.sub_kategori || !payload.tahun_ajaran) {
             alert('Lengkapi semua field dengan memilih santri dari daftar.');
             return;
         }

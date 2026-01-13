@@ -478,11 +478,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             santri_id: santriId,
             kategori,
             sub_kategori: document.getElementById('catatan-subkategori').value,
-            keterangan: getKeteranganValue(kategori),
+            keterangan: getKeteranganValue(kategori) || null,
             tahun_ajaran: document.getElementById('catatan-tahun').value.trim()
         };
 
-        if (!payload.kategori || !payload.sub_kategori || !payload.keterangan || !payload.tahun_ajaran) {
+        if (!payload.kategori || !payload.sub_kategori || !payload.tahun_ajaran) {
             alert('Lengkapi semua field.');
             return;
         }

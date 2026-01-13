@@ -337,12 +337,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const payload = {
             santri_id: document.getElementById('prestasi-santri').value,
             nama_kegiatan: document.getElementById('prestasi-kegiatan').value,
-            keterangan: document.getElementById('prestasi-keterangan').value,
+            keterangan: document.getElementById('prestasi-keterangan').value.trim() || null,
             kategori_kegiatan: document.getElementById('prestasi-kategori').value,
             tahun_ajaran: document.getElementById('prestasi-tahun').value.trim()
         };
 
-        if (!payload.santri_id || !payload.nama_kegiatan || !payload.keterangan || !payload.kategori_kegiatan || !payload.tahun_ajaran) {
+        if (!payload.santri_id || !payload.nama_kegiatan || !payload.kategori_kegiatan || !payload.tahun_ajaran) {
             alert('Lengkapi semua field dengan memilih santri dari daftar.');
             return;
         }

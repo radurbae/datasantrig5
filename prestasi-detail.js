@@ -266,12 +266,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const payload = {
             santri_id: santriId,
             nama_kegiatan: document.getElementById('prestasi-kegiatan').value,
-            keterangan: document.getElementById('prestasi-keterangan').value,
+            keterangan: document.getElementById('prestasi-keterangan').value.trim() || null,
             kategori_kegiatan: document.getElementById('prestasi-kategori').value,
             tahun_ajaran: document.getElementById('prestasi-tahun').value.trim()
         };
 
-        if (!payload.nama_kegiatan || !payload.keterangan || !payload.kategori_kegiatan || !payload.tahun_ajaran) {
+        if (!payload.nama_kegiatan || !payload.kategori_kegiatan || !payload.tahun_ajaran) {
             alert('Lengkapi semua field.');
             return;
         }
