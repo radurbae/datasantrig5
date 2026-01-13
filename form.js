@@ -55,6 +55,14 @@ async function handleFormSubmit(e) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Menyimpan...';
 
+    const errors = validateForm();
+    if (errors.length) {
+        alert(errors.join('\n'));
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+    }
+
     const formData = {
         nomorStambuk: document.getElementById('nomor-stambuk').value.trim(),
         nama: document.getElementById('nama').value.trim(),
@@ -105,6 +113,35 @@ async function handleFormSubmit(e) {
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
     }
+}
+
+function validateForm() {
+    const errors = [];
+    const maxLen = (value, len) => value && value.length > len;
+    const nomor = document.getElementById('nomor-stambuk').value.trim();
+    const nama = document.getElementById('nama').value.trim();
+    const ayah = document.getElementById('ayah').value.trim();
+    const tempat = document.getElementById('tempat-lahir').value.trim();
+    const tanggal = document.getElementById('tanggal-lahir').value;
+    const daerah = document.getElementById('daerah').value.trim();
+    const status = document.getElementById('status').value;
+    const kelas = document.getElementById('kelas').value.trim();
+    const noAbsen = document.getElementById('no-absen').value.trim();
+
+    const stambukPattern = /^[0-9.\\-]{3,50}$/;
+    if (!nomor || !stambukPattern.test(nomor)) {
+        errors.push('Nomor stambuk harus diisi dan hanya angka/titik.');
+    }
+    if (!nama || maxLen(nama, 100)) errors.push('Nama harus diisi (maks 100 karakter).');
+    if (maxLen(ayah, 100)) errors.push('Nama ayah terlalu panjang (maks 100).');
+    if (maxLen(tempat, 50)) errors.push('Tempat lahir terlalu panjang (maks 50).');
+    if (!tanggal) errors.push('Tanggal lahir harus diisi.');
+    if (!status) errors.push('Status wajib dipilih.');
+    if (!kelas || maxLen(kelas, 20)) errors.push('Kelas harus diisi (maks 20).');
+    if (noAbsen && isNaN(parseInt(noAbsen, 10))) errors.push('No absen harus berupa angka.');
+    if (maxLen(daerah, 100)) errors.push('Daerah terlalu panjang (maks 100).');
+
+    return errors;
 }
 
 // Load santri data for editing
