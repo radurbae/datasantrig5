@@ -117,7 +117,7 @@ CREATE TRIGGER update_santri_updated_at
 </script>
 ```
 
-Jika perlu, pakai `.env` dan injeksikan saat build/deploy (Vite, Netlify env, dsb).
+Jika perlu, pakai `.env` dan injeksikan saat build/deploy (Vite, Netlify env, dsb). Untuk GitHub Pages (`https://radurbae.github.io/datasantrig5`), simpan snippet di file terpisah (mis. `env.js` yang tidak di-commit) dan load sebelum `config.js`.
 
 Contoh:
 ```javascript
