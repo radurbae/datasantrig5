@@ -2,11 +2,14 @@
 // Ganti dengan URL dan API Key dari project Supabase Anda
 // Dapatkan dari: https://app.supabase.com/project/YOUR_PROJECT/settings/api
 
-// ⚠️ Jangan commit key Supabase ke repository publik.
-// Atur nilai di lingkungan runtime, mis: lewat window.__SUPABASE_URL / window.__SUPABASE_ANON_KEY
+// Supabase runtime config. Akan mencoba pakai env.js (window.__SUPABASE_URL/ANON_KEY),
+// jika tidak ada, fallback ke nilai default project agar halaman tetap berjalan.
+const FALLBACK_SUPABASE_URL = 'https://gxscphibhxovimjeljlm.supabase.co';
+const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4c2NwaGliaHhvdmltamVsamxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5OTg1MjcsImV4cCI6MjA4MzU3NDUyN30.d5_CtN4YZjg30Tpp80Nz-7SuHHpcY3rk5pNzDvNij-Y';
+
 const SUPABASE_CONFIG = {
-    url: typeof window !== 'undefined' && window.__SUPABASE_URL ? window.__SUPABASE_URL : '',
-    anonKey: typeof window !== 'undefined' && window.__SUPABASE_ANON_KEY ? window.__SUPABASE_ANON_KEY : ''
+    url: typeof window !== 'undefined' && window.__SUPABASE_URL ? window.__SUPABASE_URL : FALLBACK_SUPABASE_URL,
+    anonKey: typeof window !== 'undefined' && window.__SUPABASE_ANON_KEY ? window.__SUPABASE_ANON_KEY : FALLBACK_SUPABASE_ANON_KEY
 };
 
 function isConfigAvailable() {
@@ -36,8 +39,7 @@ function initSupabase() {
     
     // Check if configuration is set
     if (!isConfigAvailable()) {
-        console.error('Supabase tidak dikonfigurasi. Pastikan env.js memuat window.__SUPABASE_URL dan window.__SUPABASE_ANON_KEY sebelum config.js.');
-        alert('Supabase belum dikonfigurasi. Pastikan env.js memuat __SUPABASE_URL dan __SUPABASE_ANON_KEY.');
+        console.error('Supabase tidak dikonfigurasi.');
         return null;
     }
     
