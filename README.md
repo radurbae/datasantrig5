@@ -108,14 +108,22 @@ CREATE TRIGGER update_santri_updated_at
 ### 4. Konfigurasi di Aplikasi
 
 1. Buka file `config.js`
-2. Ganti `YOUR_SUPABASE_PROJECT_URL` dengan **Project URL** dari Supabase
-3. Ganti `YOUR_SUPABASE_ANON_KEY` dengan **anon public** key dari Supabase
+2. Jangan commit key ke repo. Setel di runtime, misalnya pada halaman HTML sebelum `config.js`:
+
+```html
+<script>
+  window.__SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
+  window.__SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
+</script>
+```
+
+Jika perlu, pakai `.env` dan injeksikan saat build/deploy (Vite, Netlify env, dsb).
 
 Contoh:
 ```javascript
 const SUPABASE_CONFIG = {
-    url: 'https://abcdefghijklmnop.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFiY2RlZmdoaWprbG1ub3AiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNjIzOTAyMiwiZXhwIjoxOTMxODE1MDIyfQ...'
+    url: window.__SUPABASE_URL,
+    anonKey: window.__SUPABASE_ANON_KEY
 };
 ```
 

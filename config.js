@@ -2,9 +2,11 @@
 // Ganti dengan URL dan API Key dari project Supabase Anda
 // Dapatkan dari: https://app.supabase.com/project/YOUR_PROJECT/settings/api
 
+// ⚠️ Jangan commit key Supabase ke repository publik.
+// Atur nilai di lingkungan runtime, mis: lewat window.__SUPABASE_URL / window.__SUPABASE_ANON_KEY
 const SUPABASE_CONFIG = {
-    url: 'https://gxscphibhxovimjeljlm.supabase.co', // Contoh: 'https://abcdefghijklmnop.supabase.co'
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4c2NwaGliaHhvdmltamVsamxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5OTg1MjcsImV4cCI6MjA4MzU3NDUyN30.d5_CtN4YZjg30Tpp80Nz-7SuHHpcY3rk5pNzDvNij-Y'  // Contoh: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+    url: typeof window !== 'undefined' && window.__SUPABASE_URL ? window.__SUPABASE_URL : '',
+    anonKey: typeof window !== 'undefined' && window.__SUPABASE_ANON_KEY ? window.__SUPABASE_ANON_KEY : ''
 };
 
 // Table name
