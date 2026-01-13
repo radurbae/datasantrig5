@@ -9,6 +9,10 @@ const SUPABASE_CONFIG = {
     anonKey: typeof window !== 'undefined' && window.__SUPABASE_ANON_KEY ? window.__SUPABASE_ANON_KEY : ''
 };
 
+function isConfigAvailable() {
+    return Boolean(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey);
+}
+
 // Table name
 const TABLE_NAME = 'santri';
 
@@ -31,11 +35,9 @@ function initSupabase() {
     }
     
     // Check if configuration is set
-    if (!SUPABASE_CONFIG.url || SUPABASE_CONFIG.url === 'YOUR_SUPABASE_PROJECT_URL' || 
-        !SUPABASE_CONFIG.anonKey || SUPABASE_CONFIG.anonKey === 'YOUR_SUPABASE_ANON_KEY') {
-        console.error('Please configure Supabase URL and API Key in config.js');
-        console.warn('⚠️ Supabase belum dikonfigurasi! Silakan isi SUPABASE_CONFIG di config.js');
-        // Don't show alert on every page load, just log it
+    if (!isConfigAvailable()) {
+        console.error('Supabase tidak dikonfigurasi. Pastikan env.js memuat window.__SUPABASE_URL dan window.__SUPABASE_ANON_KEY sebelum config.js.');
+        alert('Supabase belum dikonfigurasi. Pastikan env.js memuat __SUPABASE_URL dan __SUPABASE_ANON_KEY.');
         return null;
     }
     
