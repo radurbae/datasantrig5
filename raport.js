@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateMonthLabel();
     setupViewMonthInputs();
 
-    santriData = await getAllSantri();
+    santriData = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
     santriData.sort(sortSantri);
     await loadReports();
     updateCompletionSummary();

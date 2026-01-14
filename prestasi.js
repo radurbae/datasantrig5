@@ -261,7 +261,7 @@ function renderSantriTable() {
 }
 
 async function loadData() {
-    santriData = await getAllSantri();
+    santriData = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
     prestasiData = await getPrestasi();
     santriData.sort(compareSantri);
     await loadMasterData();

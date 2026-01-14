@@ -383,7 +383,7 @@ async function loadData() {
             showError();
             return;
         }
-        allSantri = await getAllSantri();
+        allSantri = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
         await loadMasterData();
         catatanData = (await getCatatan()).filter(item => item.santri_id === santriId);
         populateCategorySelect();

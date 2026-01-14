@@ -448,7 +448,7 @@ function renderSantriTable() {
 }
 
 async function loadData() {
-    santriData = await getAllSantri();
+    santriData = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
     catatanData = await getCatatan();
     santriData.sort(compareSantri);
     await loadMasterData();
