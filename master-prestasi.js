@@ -7,20 +7,26 @@ let editingPrestasiKeteranganId = null;
 let editingPrestasiKegiatanId = null;
 const HIJRI_LOCALE = 'en-US-u-ca-islamic';
 
-function getCurrentHijriYear() {
+function getHijriYearNumber() {
     try {
         const formatter = new Intl.DateTimeFormat(HIJRI_LOCALE, { year: 'numeric' });
         const parts = formatter.formatToParts(new Date());
         const yearPart = parts.find(part => part.type === 'year');
-        if (!yearPart || !yearPart.value) return '';
-        if (/\bH\b|AH/i.test(yearPart.value)) return yearPart.value.trim();
+        if (!yearPart || !yearPart.value) return null;
         const digits = yearPart.value.replace(/\D/g, '');
-        if (!digits) return yearPart.value.trim();
-        return `${digits} H`;
+        if (!digits) return null;
+        const year = parseInt(digits, 10);
+        return Number.isFinite(year) ? year : null;
     } catch (error) {
         console.warn('Gagal membaca tahun Hijriah:', error);
-        return '';
+        return null;
     }
+}
+
+function getPrestasiAcademicYearRange() {
+    const year = getHijriYearNumber();
+    if (!year) return '';
+    return `${year} - ${year + 1} H`;
 }
 
 function escapeHtml(value) {
@@ -44,7 +50,7 @@ function resetForm(idPrefix) {
     if (submit) submit.textContent = 'Simpan';
     if (idPrefix === 'prestasi-kegiatan') {
         const yearInput = document.getElementById('prestasi-kegiatan-year');
-        if (yearInput) yearInput.value = getCurrentHijriYear();
+        if (yearInput) yearInput.value = getPrestasiAcademicYearRange();
         const categorySelect = document.getElementById('prestasi-kegiatan-category');
         if (categorySelect) categorySelect.value = '';
     }
@@ -220,7 +226,7 @@ function setupFormHandlers() {
             e.preventDefault();
             const label = document.getElementById('prestasi-kegiatan-label').value.trim();
             const categoryId = document.getElementById('prestasi-kegiatan-category').value;
-            const tahunAjaran = document.getElementById('prestasi-kegiatan-year').value.trim();
+            const tahunAjaran = getPrestasiAcademicYearRange();
             if (!label || !categoryId || !tahunAjaran) return;
             await handleSubmit({
                 confirmMessage: 'Apakah data ini sudah benar?',
@@ -308,7 +314,7 @@ function setupTableHandlers() {
                 document.getElementById('prestasi-kegiatan-category').value = item.category_id || '';
                 const yearInput = document.getElementById('prestasi-kegiatan-year');
                 if (yearInput) {
-                    yearInput.value = item.tahun_ajaran || getCurrentHijriYear();
+                    yearInput.value = getPrestasiAcademicYearRange();
                 }
                 editingPrestasiKegiatanId = id;
                 setEditMode('prestasi-kegiatan', 'Mode: Edit');
