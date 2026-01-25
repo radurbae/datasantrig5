@@ -68,6 +68,14 @@ function getKelasGroup(kelas) {
     return 'Tidak diketahui';
 }
 
+function getKelasLevel(kelas) {
+    const normalized = normalizeKelas(kelas);
+    if (!normalized) return 'Tidak diketahui';
+    const numMatch = normalized.match(/^(\d+)/);
+    if (numMatch) return numMatch[1];
+    return 'Tidak diketahui';
+}
+
 function groupCounts(data, keyFn) {
     const counts = {};
     data.forEach(item => {
@@ -162,7 +170,7 @@ function renderAdvancedSummary(data, type) {
         activeData.forEach(item => {
             const asrama = resolveAsrama(item.asrama);
             if (!asrama) return;
-            const kelasLabel = normalizeKelas(item.kelas) || 'Tidak diketahui';
+            const kelasLabel = getKelasLevel(item.kelas);
             grouped[asrama][kelasLabel] = (grouped[asrama][kelasLabel] || 0) + 1;
         });
 
