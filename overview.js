@@ -130,10 +130,12 @@ function renderAdvancedSummary(data, type) {
         counts = groupCounts(activeData, item => normalizeKelas(item.kelas) || 'Tidak diketahui');
     } else if (type === 'konsulat') {
         counts = groupCounts(activeData, item => item.konsulat || 'Tidak diketahui');
+    } else if (type === 'rayon') {
+        counts = groupCounts(activeData, item => item.rayon || 'Tidak diketahui');
     }
 
     const sorted = Object.entries(counts).sort((a, b) => {
-        if (type === 'konsulat') {
+        if (type === 'konsulat' || type === 'rayon') {
             return a[0].toString().trim().localeCompare(b[0].toString().trim(), 'id', { sensitivity: 'base', numeric: true });
         }
         if (type !== 'kelas') return b[1] - a[1];
