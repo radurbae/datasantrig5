@@ -5,6 +5,23 @@ let prestasiKegiatanOptions = [];
 let editingPrestasiCategoryId = null;
 let editingPrestasiKeteranganId = null;
 let editingPrestasiKegiatanId = null;
+const HIJRI_LOCALE = 'en-US-u-ca-islamic';
+
+function getCurrentHijriYear() {
+    try {
+        const formatter = new Intl.DateTimeFormat(HIJRI_LOCALE, { year: 'numeric' });
+        const parts = formatter.formatToParts(new Date());
+        const yearPart = parts.find(part => part.type === 'year');
+        if (!yearPart || !yearPart.value) return '';
+        if (/\bH\b|AH/i.test(yearPart.value)) return yearPart.value.trim();
+        const digits = yearPart.value.replace(/\D/g, '');
+        if (!digits) return yearPart.value.trim();
+        return `${digits} H`;
+    } catch (error) {
+        console.warn('Gagal membaca tahun Hijriah:', error);
+        return '';
+    }
+}
 
 function escapeHtml(value) {
     return (value || '')
@@ -25,6 +42,12 @@ function resetForm(idPrefix) {
     if (mode) mode.textContent = '';
     if (cancel) cancel.style.display = 'none';
     if (submit) submit.textContent = 'Simpan';
+    if (idPrefix === 'prestasi-kegiatan') {
+        const yearInput = document.getElementById('prestasi-kegiatan-year');
+        if (yearInput) yearInput.value = getCurrentHijriYear();
+        const categorySelect = document.getElementById('prestasi-kegiatan-category');
+        if (categorySelect) categorySelect.value = '';
+    }
 }
 
 function setEditMode(idPrefix, text) {
@@ -90,13 +113,19 @@ function renderPrestasiKegiatan() {
     const tbody = document.getElementById('prestasi-kegiatan-tbody');
     if (!tbody) return;
     if (!prestasiKegiatanOptions.length) {
-        tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Belum ada data nama kegiatan.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada data nama kegiatan.</td></tr>';
         return;
     }
+    const categoryMap = prestasiCategories.reduce((acc, item) => {
+        acc[item.id] = item.name;
+        return acc;
+    }, {});
     tbody.innerHTML = prestasiKegiatanOptions.map((item, index) => `
         <tr>
             <td>${index + 1}</td>
             <td>${escapeHtml(item.label)}</td>
+            <td>${escapeHtml(categoryMap[item.category_id] || '-')}</td>
+            <td>${escapeHtml(item.tahun_ajaran || '-')}</td>
             <td>
                 <button class="btn btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
                 <button class="btn btn-danger" data-action="delete" data-id="${item.id}">Hapus</button>
@@ -113,6 +142,21 @@ async function loadMasterData() {
     renderPrestasiCategories();
     renderPrestasiKeterangan();
     renderPrestasiKegiatan();
+    renderKegiatanCategoryOptions();
+}
+
+function renderKegiatanCategoryOptions() {
+    const select = document.getElementById('prestasi-kegiatan-category');
+    if (!select) return;
+    const current = select.value;
+    select.innerHTML = '<option value="">Pilih kategori</option>' +
+        prestasiCategories.map(cat => `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`).join('');
+    if (current) {
+        select.value = current;
+    }
+    if (!prestasiCategories.length) {
+        select.value = '';
+    }
 }
 
 function setupFormHandlers() {
@@ -175,14 +219,16 @@ function setupFormHandlers() {
         kegForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const label = document.getElementById('prestasi-kegiatan-label').value.trim();
-            if (!label) return;
+            const categoryId = document.getElementById('prestasi-kegiatan-category').value;
+            const tahunAjaran = document.getElementById('prestasi-kegiatan-year').value.trim();
+            if (!label || !categoryId || !tahunAjaran) return;
             await handleSubmit({
                 confirmMessage: 'Apakah data ini sudah benar?',
                 successMessage: 'Data nama kegiatan berhasil disimpan.',
                 failureMessage: 'Data nama kegiatan gagal disimpan.',
                 run: async () => editingPrestasiKegiatanId
-                    ? updatePrestasiKegiatanOption(editingPrestasiKegiatanId, { label })
-                    : insertPrestasiKegiatanOption({ label }),
+                    ? updatePrestasiKegiatanOption(editingPrestasiKegiatanId, { label, category_id: categoryId, tahun_ajaran: tahunAjaran })
+                    : insertPrestasiKegiatanOption({ label, category_id: categoryId, tahun_ajaran: tahunAjaran }),
                 onSuccess: async () => {
                     editingPrestasiKegiatanId = null;
                     resetForm('prestasi-kegiatan');
@@ -259,6 +305,11 @@ function setupTableHandlers() {
                 const item = prestasiKegiatanOptions.find(entry => entry.id === id);
                 if (!item) return;
                 document.getElementById('prestasi-kegiatan-label').value = item.label;
+                document.getElementById('prestasi-kegiatan-category').value = item.category_id || '';
+                const yearInput = document.getElementById('prestasi-kegiatan-year');
+                if (yearInput) {
+                    yearInput.value = item.tahun_ajaran || getCurrentHijriYear();
+                }
                 editingPrestasiKegiatanId = id;
                 setEditMode('prestasi-kegiatan', 'Mode: Edit');
                 return;
@@ -276,6 +327,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const role = await requireAuth(['admin']);
     if (!role) return;
 
+    resetForm('prestasi-kegiatan');
     await loadMasterData();
     setupFormHandlers();
     setupTableHandlers();
