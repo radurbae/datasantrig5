@@ -6,6 +6,19 @@ const STATUS_ORDER = [
     'Pindah Kampus',
     'Dikeluarkan'
 ];
+const ASRAMA_ORDER = [
+    'Ghaza 1',
+    'Ghaza 2',
+    'Syanggit',
+    'Santiniketan',
+    'Mekkah',
+    'Mesir',
+    'Riyadh'
+];
+const ASRAMA_LOOKUP = ASRAMA_ORDER.reduce((acc, name) => {
+    acc[name.toLowerCase()] = name;
+    return acc;
+}, {});
 
 function statusClassName(status) {
     return (status || '').toLowerCase().replace(/\s+/g, '-');
@@ -24,6 +37,16 @@ function formatBirthdayDate(date) {
 
 function normalizeKelas(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
+}
+
+function normalizeAsrama(asrama) {
+    return (asrama || '').toString().trim();
+}
+
+function resolveAsrama(asrama) {
+    const normalized = normalizeAsrama(asrama);
+    if (!normalized) return null;
+    return ASRAMA_LOOKUP[normalized.toLowerCase()] || null;
 }
 
 function parseKelasKey(kelas) {
@@ -130,12 +153,29 @@ function renderAdvancedSummary(data, type) {
         counts = groupCounts(activeData, item => normalizeKelas(item.kelas) || 'Tidak diketahui');
     } else if (type === 'konsulat') {
         counts = groupCounts(activeData, item => item.konsulat || 'Tidak diketahui');
-    } else if (type === 'rayon') {
-        counts = groupCounts(activeData, item => item.asrama || 'Tidak diketahui');
+    } else if (type === 'asrama') {
+        counts = ASRAMA_ORDER.reduce((acc, name) => {
+            acc[name] = 0;
+            return acc;
+        }, {});
+        activeData.forEach(item => {
+            const asrama = resolveAsrama(item.asrama);
+            if (asrama) counts[asrama] += 1;
+        });
+    }
+
+    if (type === 'asrama') {
+        summaryEl.innerHTML = ASRAMA_ORDER.map(name => `
+            <div class="overview-row">
+                <span>${name}</span>
+                <strong>${counts[name] || 0}</strong>
+            </div>
+        `).join('');
+        return;
     }
 
     const sorted = Object.entries(counts).sort((a, b) => {
-        if (type === 'konsulat' || type === 'rayon') {
+        if (type === 'konsulat') {
             return a[0].toString().trim().localeCompare(b[0].toString().trim(), 'id', { sensitivity: 'base', numeric: true });
         }
         if (type !== 'kelas') return b[1] - a[1];
