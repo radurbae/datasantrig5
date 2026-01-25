@@ -131,7 +131,7 @@ function renderAdvancedSummary(data, type) {
     } else if (type === 'konsulat') {
         counts = groupCounts(activeData, item => item.konsulat || 'Tidak diketahui');
     } else if (type === 'rayon') {
-        counts = groupCounts(activeData, item => item.rayon || 'Tidak diketahui');
+        counts = groupCounts(activeData, item => item.asrama || 'Tidak diketahui');
     }
 
     const sorted = Object.entries(counts).sort((a, b) => {
