@@ -49,7 +49,7 @@ function initSupabase() {
     try {
         supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
         window.supabaseClient = supabaseClient;
-        console.log('✅ Supabase initialized successfully');
+        console.log('Supabase initialized successfully');
         return supabaseClient;
     } catch (error) {
         console.error('Error initializing Supabase:', error);
