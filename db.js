@@ -19,14 +19,18 @@ function getSupabaseClient() {
     return null;
 }
 
-async function getRaportMentalByMonth(monthDate) {
+async function getRaportMentalByMonth(monthDate, weekNumber) {
     try {
         const client = getSupabaseClient();
         if (!client) return [];
-        const { data, error } = await client
+        let query = client
             .from('raport_mental')
             .select('*')
             .eq('month', monthDate);
+        if (Number.isFinite(weekNumber)) {
+            query = query.eq('week', weekNumber);
+        }
+        const { data, error } = await query;
         if (error) {
             console.error('Error fetching raport mental:', error);
             return [];
@@ -44,7 +48,7 @@ async function upsertRaportMental(payload) {
         if (!client) return null;
         const { data, error } = await client
             .from('raport_mental')
-            .upsert(payload, { onConflict: 'santri_id,month' })
+            .upsert(payload, { onConflict: 'santri_id,month,week' })
             .select()
             .single();
         if (error) {

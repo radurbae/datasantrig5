@@ -39,7 +39,7 @@
             <div class="content-wrap">
                 <header class="page-header">
                     <h1>Raport Mental Santri</h1>
-                    <p class="subtitle">Input nilai kepribadian bulanan per santri</p>
+                    <p class="subtitle">Input nilai kepribadian mingguan per santri</p>
                 </header>
 
                 <section id="raport-classes" class="report-section">
@@ -52,6 +52,13 @@
                             <div class="overview-header-actions">
                                 <label for="raport-view-month" class="filter-label">Bulan</label>
                                 <input type="month" id="raport-view-month" class="month-input">
+                                <label for="raport-view-week" class="filter-label">Minggu</label>
+                                <select id="raport-view-week" class="filter-select">
+                                    <option value="1">Minggu 1</option>
+                                    <option value="2">Minggu 2</option>
+                                    <option value="3">Minggu 3</option>
+                                    <option value="4">Minggu 4</option>
+                                </select>
                                 <button class="btn btn-secondary" id="download-all" data-admin-only>Download Semua</button>
                             </div>
                         </div>
@@ -70,6 +77,13 @@
                             <div class="overview-header-actions">
                                 <label for="raport-view-month-secondary" class="filter-label">Bulan</label>
                                 <input type="month" id="raport-view-month-secondary" class="month-input">
+                                <label for="raport-view-week-secondary" class="filter-label">Minggu</label>
+                                <select id="raport-view-week-secondary" class="filter-select">
+                                    <option value="1">Minggu 1</option>
+                                    <option value="2">Minggu 2</option>
+                                    <option value="3">Minggu 3</option>
+                                    <option value="4">Minggu 4</option>
+                                </select>
                                 <button class="btn btn-secondary" id="download-class" data-admin-only>Download Kelas</button>
                             </div>
                             <a href="raport.html" class="btn btn-secondary">← Kembali</a>
@@ -112,6 +126,16 @@
                                 <small id="month-lock" class="report-hint"></small>
                             </div>
                             <div class="form-group">
+                                <label for="raport-week">Minggu Penilaian</label>
+                                <select id="raport-week" class="filter-select" required>
+                                    <option value="1">Minggu 1</option>
+                                    <option value="2">Minggu 2</option>
+                                    <option value="3">Minggu 3</option>
+                                    <option value="4">Minggu 4</option>
+                                </select>
+                                <small id="week-lock" class="report-hint"></small>
+                            </div>
+                            <div class="form-group">
                                 <label>Status</label>
                                 <div id="report-mode" class="overview-total"></div>
                             </div>
@@ -138,6 +162,6 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="db.js"></script>
-    <script src="raport.js?v=5"></script>
+    <script src="raport.js?v=6"></script>
 </body>
 </html>

@@ -27,16 +27,40 @@ let santriData = [];
 let reportData = [];
 let currentRole = 'user';
 let currentMonthValue = '';
+let currentWeekValue = '';
 let viewMonthValue = '';
+let viewWeekValue = '';
 
 function getMonthValue() {
     const input = document.getElementById('raport-month');
     return input?.value || '';
 }
 
+function getWeekValue() {
+    const input = document.getElementById('raport-week');
+    return input?.value || '';
+}
+
 function toMonthDate(monthValue) {
     if (!monthValue) return null;
     return `${monthValue}-01`;
+}
+
+function toWeekNumber(weekValue) {
+    const week = parseInt(weekValue, 10);
+    if (!Number.isFinite(week)) return null;
+    if (week < 1) return 1;
+    if (week > 4) return 4;
+    return week;
+}
+
+function getCurrentWeekValue() {
+    const today = new Date();
+    const day = today.getDate();
+    if (day <= 7) return '1';
+    if (day <= 14) return '2';
+    if (day <= 21) return '3';
+    return '4';
 }
 
 function normalizeKelas(kelas) {
@@ -106,6 +130,7 @@ function exportToExcel(rows, filename) {
         'Kelas',
         'No Absen',
         'Bulan',
+        'Minggu',
         'Status Raport',
         'Total Poin',
         'Predikat Total',
@@ -163,6 +188,7 @@ function buildExportRows(targetSantri) {
             normalizeKelas(s.kelas) || '-',
             s.noAbsen ?? '-',
             viewMonthValue,
+            viewWeekValue,
             status,
             totalPoints || '',
             totalPredicate
@@ -237,7 +263,7 @@ function buildFields() {
 function setFormDisabled(disabled) {
     document.querySelectorAll('#raport-form input, #raport-form textarea, #raport-form button')
         .forEach(el => {
-            if (el.id === 'raport-month' || el.id === 'filter-kelas' || el.id === 'santri-select') return;
+            if (el.id === 'raport-month' || el.id === 'raport-week' || el.id === 'filter-kelas' || el.id === 'santri-select') return;
             el.disabled = disabled;
         });
     const submitBtn = document.getElementById('raport-submit');
@@ -265,18 +291,18 @@ function fillForm(report) {
 function updateMonthLabel() {
     const label = document.getElementById('month-label');
     if (label) {
-        label.textContent = `Bulan: ${viewMonthValue}`;
+        label.textContent = `Bulan: ${viewMonthValue} • Minggu: ${viewWeekValue}`;
     }
 }
 
 function updateCompletionSummary() {
     const summary = document.getElementById('completion-summary');
     if (!summary) return;
-    summary.textContent = `Rekap pengisian bulan ${viewMonthValue}.`;
+    summary.textContent = `Rekap pengisian bulan ${viewMonthValue} minggu ${viewWeekValue}.`;
 }
 
 async function loadReports() {
-    reportData = await getRaportMentalByMonth(toMonthDate(viewMonthValue));
+    reportData = await getRaportMentalByMonth(toMonthDate(viewMonthValue), toWeekNumber(viewWeekValue));
 }
 
 function setupMonthDefault() {
@@ -289,43 +315,82 @@ function setupMonthDefault() {
     monthInput.max = monthValue;
 }
 
-function setupViewMonthInputs() {
-    const primary = document.getElementById('raport-view-month');
-    const secondary = document.getElementById('raport-view-month-secondary');
-    const stored = localStorage.getItem('raportViewMonth');
-    viewMonthValue = stored || currentMonthValue;
+function setupWeekDefault() {
+    const weekInput = document.getElementById('raport-week');
+    if (!weekInput) return;
+    const weekValue = getCurrentWeekValue();
+    weekInput.value = weekValue;
+    Array.from(weekInput.options).forEach(option => {
+        option.disabled = option.value !== weekValue;
+    });
+}
 
-    [primary, secondary].forEach(input => {
+function setupViewPeriodInputs() {
+    const monthPrimary = document.getElementById('raport-view-month');
+    const monthSecondary = document.getElementById('raport-view-month-secondary');
+    const weekPrimary = document.getElementById('raport-view-week');
+    const weekSecondary = document.getElementById('raport-view-week-secondary');
+    const storedMonth = localStorage.getItem('raportViewMonth');
+    const storedWeek = localStorage.getItem('raportViewWeek');
+
+    viewMonthValue = storedMonth || currentMonthValue;
+    viewWeekValue = String(toWeekNumber(storedWeek || currentWeekValue) || currentWeekValue);
+
+    const applyValues = () => {
+        [monthPrimary, monthSecondary].forEach(input => {
+            if (input) input.value = viewMonthValue;
+        });
+        [weekPrimary, weekSecondary].forEach(input => {
+            if (input) input.value = viewWeekValue;
+        });
+    };
+
+    const handleChange = async (nextMonth, nextWeek) => {
+        viewMonthValue = nextMonth || viewMonthValue || currentMonthValue;
+        const weekCandidate = nextWeek || viewWeekValue || currentWeekValue;
+        viewWeekValue = String(toWeekNumber(weekCandidate) || currentWeekValue);
+        localStorage.setItem('raportViewMonth', viewMonthValue);
+        localStorage.setItem('raportViewWeek', viewWeekValue);
+        applyValues();
+        await loadReports();
+        updateMonthLabel();
+        updateCompletionSummary();
+        const params = new URLSearchParams(window.location.search);
+        const kelas = params.get('kelas');
+        const santriId = params.get('santri');
+        if (!kelas) {
+            renderKelasGrid();
+        } else if (kelas && !santriId) {
+            renderSantriList(kelas);
+        }
+    };
+
+    [monthPrimary, monthSecondary].forEach(input => {
         if (!input) return;
         input.value = viewMonthValue;
         input.addEventListener('change', async () => {
-            viewMonthValue = input.value || currentMonthValue;
-            localStorage.setItem('raportViewMonth', viewMonthValue);
-            [primary, secondary].forEach(other => {
-                if (other) other.value = viewMonthValue;
-            });
-            await loadReports();
-            updateMonthLabel();
-            updateCompletionSummary();
-            const params = new URLSearchParams(window.location.search);
-            const kelas = params.get('kelas');
-            const santriId = params.get('santri');
-            if (!kelas) {
-                renderKelasGrid();
-            } else if (kelas && !santriId) {
-                renderSantriList(kelas);
-            }
+            await handleChange(input.value, null);
+        });
+    });
+
+    [weekPrimary, weekSecondary].forEach(input => {
+        if (!input) return;
+        input.value = viewWeekValue;
+        input.addEventListener('change', async () => {
+            await handleChange(null, input.value);
         });
     });
 }
 
 function getReportPayload(santriId) {
     const month = getMonthValue();
-    if (!santriId || !month) return null;
+    const week = getWeekValue();
+    if (!santriId || !month || !week) return null;
 
     const payload = {
         santri_id: santriId,
-        month: toMonthDate(month)
+        month: toMonthDate(month),
+        week: toWeekNumber(week)
     };
 
     RAPORT_CATEGORIES.forEach(cat => {
@@ -373,12 +438,14 @@ function validateCategory(cat) {
 
 function buildCategoryPayload(santriId, cat) {
     const month = getMonthValue();
-    if (!santriId || !month) return null;
+    const week = getWeekValue();
+    if (!santriId || !month || !week) return null;
     const score = parseInt(document.getElementById(`${cat.key}-score`)?.value, 10);
     const note = document.getElementById(`${cat.key}-note`)?.value.trim();
     return {
         santri_id: santriId,
         month: toMonthDate(month),
+        week: toWeekNumber(week),
         [`${cat.key}_score`]: Number.isFinite(score) ? score : null,
         [`${cat.key}_note`]: note || null
     };
@@ -444,7 +511,7 @@ function renderSantriList(kelas) {
 
     const filtered = santriData.filter(s => normalizeKelas(s.kelas) === kelas);
     if (title) title.textContent = `Kelas ${kelas}`;
-    if (subtitle) subtitle.textContent = `Bulan ${viewMonthValue}`;
+    if (subtitle) subtitle.textContent = `Bulan ${viewMonthValue} • Minggu ${viewWeekValue}`;
 
     if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada data.</td></tr>';
@@ -492,7 +559,7 @@ function renderForm(santriId, kelas) {
     const title = document.getElementById('santri-title');
     const subtitle = document.getElementById('santri-subtitle');
     if (title) title.textContent = santri ? `Raport ${santri.nama}` : 'Form Raport Mental';
-    if (subtitle) subtitle.textContent = santri ? `Kelas ${normalizeKelas(santri.kelas)} • Bulan ${currentMonthValue}` : '';
+    if (subtitle) subtitle.textContent = santri ? `Kelas ${normalizeKelas(santri.kelas)} • Bulan ${currentMonthValue} • Minggu ${currentWeekValue}` : '';
 
     const existing = reportData.find(r => r.santri_id === santriId);
     fillForm(existing || null);
@@ -503,11 +570,19 @@ function renderForm(santriId, kelas) {
 
     const monthInput = document.getElementById('raport-month');
     const lock = document.getElementById('month-lock');
+    const weekInput = document.getElementById('raport-week');
+    const weekLock = document.getElementById('week-lock');
     if (monthInput) {
         monthInput.value = currentMonthValue;
     }
     if (lock) {
         lock.textContent = 'Input hanya untuk bulan berjalan.';
+    }
+    if (weekInput) {
+        weekInput.value = currentWeekValue;
+    }
+    if (weekLock) {
+        weekLock.textContent = 'Input hanya untuk minggu berjalan.';
     }
 }
 
@@ -517,10 +592,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     buildFields();
     setupMonthDefault();
+    setupWeekDefault();
     currentMonthValue = getMonthValue();
+    currentWeekValue = getWeekValue() || getCurrentWeekValue();
     viewMonthValue = currentMonthValue;
+    viewWeekValue = currentWeekValue;
     updateMonthLabel();
-    setupViewMonthInputs();
+    setupViewPeriodInputs();
 
     santriData = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
     santriData.sort(sortSantri);
@@ -547,7 +625,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (downloadAllBtn) {
         downloadAllBtn.addEventListener('click', () => {
             const rows = buildExportRows(santriData);
-            const filename = `raport-mental-${viewMonthValue}-semua.xls`;
+            const filename = `raport-mental-${viewMonthValue}-minggu-${viewWeekValue}-semua.xls`;
             exportToExcel(rows, filename);
         });
     }
@@ -558,7 +636,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!kelas) return;
             const target = santriData.filter(s => normalizeKelas(s.kelas) === kelas);
             const safeKelas = normalizeKelas(kelas).replace(/\s+/g, '-');
-            const filename = `raport-mental-${viewMonthValue}-${safeKelas}.xls`;
+            const filename = `raport-mental-${viewMonthValue}-minggu-${viewWeekValue}-${safeKelas}.xls`;
             exportToExcel(buildExportRows(target), filename);
         });
     }
