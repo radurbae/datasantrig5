@@ -10,7 +10,7 @@ Sistem manajemen data santri berbasis Supabase dengan fitur lengkap untuk input,
 - **Prestasi**: Input prestasi (pilih santri searchable, nama kegiatan dari master, kategori, keterangan opsional, tahun ajaran hijriah terkunci). Listing per santri (20 item + search/filter), detail, edit, hapus (admin), export Excel. Hanya santri aktif yang tampil.
 - **Catatan**: Input catatan (kategori, sub kategori, keterangan opsional, tahun ajaran hijriah terkunci) dengan sub kategori dinamis per kategori. Listing per santri (20 item + search/filter), detail biodata + catatan, edit, hapus (admin). Hanya santri aktif yang tampil.
 - **Master Data (Admin)**: Master Prestasi (kategori, keterangan, nama kegiatan) dan Master Catatan (kategori, sub kategori per jenis, keterangan) dengan CRUD dan konfirmasi simpan.
-- **UI/UX**: Sidebar modern (Poppins), collapsible di mobile, landing setelah login ke overview. Konfirmasi “Apakah data sudah benar?” sebelum simpan, alert hasil simpan, tombol download hijau, header tabel biru, badge predikat total berwarna (merah/kuning/hijau).
+- **UI/UX**: Sidebar modern (Plus Jakarta Sans), collapsible di mobile, landing setelah login ke overview. Konfirmasi “Apakah data sudah benar?” sebelum simpan, alert hasil simpan, tombol download hijau, header tabel biru, badge predikat total berwarna (merah/kuning/hijau).
 
 ## Konfigurasi Supabase
 - Set `window.__SUPABASE_URL` dan `window.__SUPABASE_ANON_KEY` di `env.js` (dimuat sebelum `config.js`). `config.js` punya fallback anon key publik agar halaman tidak gagal jika env belum ada, tapi gunakan env saat produksi.
