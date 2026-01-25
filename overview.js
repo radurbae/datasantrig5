@@ -154,23 +154,43 @@ function renderAdvancedSummary(data, type) {
     } else if (type === 'konsulat') {
         counts = groupCounts(activeData, item => item.konsulat || 'Tidak diketahui');
     } else if (type === 'asrama') {
-        counts = ASRAMA_ORDER.reduce((acc, name) => {
-            acc[name] = 0;
+        const grouped = ASRAMA_ORDER.reduce((acc, name) => {
+            acc[name] = {};
             return acc;
         }, {});
+
         activeData.forEach(item => {
             const asrama = resolveAsrama(item.asrama);
-            if (asrama) counts[asrama] += 1;
+            if (!asrama) return;
+            const kelasLabel = normalizeKelas(item.kelas) || 'Tidak diketahui';
+            grouped[asrama][kelasLabel] = (grouped[asrama][kelasLabel] || 0) + 1;
         });
-    }
 
-    if (type === 'asrama') {
-        summaryEl.innerHTML = ASRAMA_ORDER.map(name => `
-            <div class="overview-row">
-                <span>${name}</span>
-                <strong>${counts[name] || 0}</strong>
-            </div>
-        `).join('');
+        summaryEl.innerHTML = ASRAMA_ORDER.map(name => {
+            const kelasCounts = grouped[name] || {};
+            const total = Object.values(kelasCounts).reduce((sum, val) => sum + val, 0);
+            const subs = Object.entries(kelasCounts).sort((a, b) => {
+                const aKey = parseKelasKey(a[0]);
+                const bKey = parseKelasKey(b[0]);
+                if (aKey.num !== bKey.num) return aKey.num - bKey.num;
+                return aKey.suffix.localeCompare(bKey.suffix, 'id', { numeric: true });
+            });
+            const subRows = subs.map(([label, count]) => `
+                <div class="overview-row overview-subrow">
+                    <span>${label}</span>
+                    <strong>${count}</strong>
+                </div>
+            `).join('');
+            return `
+                <div class="overview-group">
+                    <div class="overview-row overview-group-row">
+                        <span>${name}</span>
+                        <strong>${total}</strong>
+                    </div>
+                    ${subRows ? `<div class="overview-sublist">${subRows}</div>` : ''}
+                </div>
+            `;
+        }).join('');
         return;
     }
 
