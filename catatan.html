@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catatan Santri - Database Santri PMDG Kampus 5 Darul Qiyam</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
     <div class="app-shell">
         <aside class="sidebar">
@@ -49,12 +52,13 @@
                             <h2>Input Catatan</h2>
                             <span class="overview-total" id="catatan-mode"></span>
                         </div>
-                        <form id="catatan-form" class="report-form" data-admin-only>
+                        <form id="catatan-form" class="report-form">
                             <div class="report-grid">
                                 <div class="form-group">
                                     <label for="catatan-santri-input">Pilih Santri</label>
                                     <div class="searchable-select">
-                                        <input type="text" id="catatan-santri-input" list="catatan-santri-list" placeholder="Ketik nama santri" required>
+                                        <input type="text" id="catatan-santri-input" list="catatan-santri-list"
+                                            placeholder="Ketik nama santri" required>
                                         <datalist id="catatan-santri-list"></datalist>
                                         <input type="hidden" id="catatan-santri">
                                     </div>
@@ -98,7 +102,8 @@
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary" id="catatan-submit">Simpan</button>
-                                <button type="button" class="btn btn-secondary" id="catatan-cancel" style="display: none;">Batal</button>
+                                <button type="button" class="btn btn-secondary" id="catatan-cancel"
+                                    style="display: none;">Batal</button>
                             </div>
                         </form>
                         <div class="overview-empty" id="catatan-readonly" style="display: none;">
@@ -111,7 +116,8 @@
                     <div class="search-card">
                         <div class="search-row">
                             <div class="search-group">
-                                <input type="text" id="catatan-search" placeholder="Cari santri (nama, kelas, stambuk...)" class="search-input">
+                                <input type="text" id="catatan-search"
+                                    placeholder="Cari santri (nama, kelas, stambuk...)" class="search-input">
                             </div>
                             <div class="filter-group">
                                 <select id="catatan-filter-kelas" class="filter-select">
@@ -181,4 +187,5 @@
     <script src="db.js"></script>
     <script src="catatan.js?v=6"></script>
 </body>
+
 </html>

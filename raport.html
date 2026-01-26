@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raport Mental - Database Santri PMDG Kampus 5 Darul Qiyam</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
     <div class="app-shell">
         <aside class="sidebar">
@@ -60,7 +63,8 @@
                                     <option value="3">Minggu 3</option>
                                     <option value="4">Minggu 4</option>
                                 </select>
-                                <button class="btn btn-secondary" id="download-all" data-admin-only>Download Semua</button>
+                                <button class="btn btn-secondary" id="download-all" data-admin-only>Download
+                                    Semua</button>
                             </div>
                         </div>
                         <div id="completion-summary" class="report-summary"></div>
@@ -85,7 +89,8 @@
                                     <option value="3">Minggu 3</option>
                                     <option value="4">Minggu 4</option>
                                 </select>
-                                <button class="btn btn-secondary" id="download-class" data-admin-only>Download Kelas</button>
+                                <button class="btn btn-secondary" id="download-class" data-admin-only>Download
+                                    Kelas</button>
                             </div>
                             <a href="raport.html" class="btn btn-secondary">← Kembali</a>
                         </div>
@@ -147,7 +152,7 @@
                             </div>
                             <span id="progress-text" class="progress-text"></span>
                         </div>
-                        <form id="raport-form" class="report-form" data-admin-only>
+                        <form id="raport-form" class="report-form">
                             <div id="report-fields" class="report-grid"></div>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary" id="raport-submit">Simpan Semua</button>
@@ -165,4 +170,5 @@
     <script src="db.js"></script>
     <script src="raport.js?v=6"></script>
 </body>
+
 </html>

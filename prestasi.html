@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prestasi Santri - Database Santri PMDG Kampus 5 Darul Qiyam</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
     <div class="app-shell">
         <aside class="sidebar">
@@ -49,12 +52,13 @@
                             <h2>Input Prestasi</h2>
                             <span class="overview-total" id="prestasi-mode"></span>
                         </div>
-                        <form id="prestasi-form" class="report-form" data-admin-only>
+                        <form id="prestasi-form" class="report-form">
                             <div class="report-grid">
                                 <div class="form-group">
                                     <label for="prestasi-santri-input">Pilih Santri</label>
                                     <div class="searchable-select">
-                                        <input type="text" id="prestasi-santri-input" list="prestasi-santri-list" placeholder="Ketik nama santri" required>
+                                        <input type="text" id="prestasi-santri-input" list="prestasi-santri-list"
+                                            placeholder="Ketik nama santri" required>
                                         <datalist id="prestasi-santri-list"></datalist>
                                         <input type="hidden" id="prestasi-santri">
                                     </div>
@@ -96,7 +100,8 @@
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary" id="prestasi-submit">Simpan</button>
-                                <button type="button" class="btn btn-secondary" id="prestasi-cancel" style="display: none;">Batal</button>
+                                <button type="button" class="btn btn-secondary" id="prestasi-cancel"
+                                    style="display: none;">Batal</button>
                             </div>
                         </form>
                         <div class="overview-empty" id="prestasi-readonly" style="display: none;">
@@ -109,7 +114,8 @@
                     <div class="search-card">
                         <div class="search-row">
                             <div class="search-group">
-                                <input type="text" id="prestasi-search" placeholder="Cari santri (nama, kelas, stambuk...)" class="search-input">
+                                <input type="text" id="prestasi-search"
+                                    placeholder="Cari santri (nama, kelas, stambuk...)" class="search-input">
                             </div>
                             <div class="filter-group">
                                 <select id="prestasi-filter-kelas" class="filter-select">
@@ -179,4 +185,5 @@
     <script src="db.js"></script>
     <script src="prestasi.js?v=7"></script>
 </body>
+
 </html>

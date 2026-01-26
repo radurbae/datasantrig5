@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Prestasi Santri - Database Santri PMDG Kampus 5 Darul Qiyam</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
     <div class="app-shell">
         <aside class="sidebar">
@@ -49,7 +52,8 @@
                     </div>
                     <div id="error-state" class="error-state" style="display: none;">
                         <p>Data tidak ditemukan atau terjadi kesalahan.</p>
-                        <button class="btn btn-secondary" onclick="window.location.href='prestasi.html'">Kembali ke Prestasi</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='prestasi.html'">Kembali ke
+                            Prestasi</button>
                     </div>
                     <div id="detail-content" class="detail-card" style="display: none;">
                         <div class="detail-header">
@@ -113,7 +117,8 @@
                             </div>
                         </div>
                         <div class="detail-actions">
-                            <button class="btn btn-secondary" onclick="window.location.href='prestasi.html'">← Kembali ke Prestasi</button>
+                            <button class="btn btn-secondary" onclick="window.location.href='prestasi.html'">← Kembali
+                                ke Prestasi</button>
                         </div>
                     </div>
                 </section>
@@ -124,7 +129,7 @@
                             <h2>Input Prestasi</h2>
                             <span class="overview-total" id="prestasi-mode"></span>
                         </div>
-                        <form id="prestasi-form" class="report-form" data-admin-only>
+                        <form id="prestasi-form" class="report-form">
                             <div class="report-grid">
                                 <div class="form-group">
                                     <label for="prestasi-kegiatan">Nama Kegiatan</label>
@@ -163,7 +168,8 @@
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary" id="prestasi-submit">Simpan</button>
-                                <button type="button" class="btn btn-secondary" id="prestasi-cancel" style="display: none;">Batal</button>
+                                <button type="button" class="btn btn-secondary" id="prestasi-cancel"
+                                    style="display: none;">Batal</button>
                             </div>
                         </form>
                         <div class="overview-empty" id="prestasi-readonly" style="display: none;">
@@ -208,4 +214,5 @@
     <script src="db.js"></script>
     <script src="prestasi-detail.js?v=6"></script>
 </body>
+
 </html>
