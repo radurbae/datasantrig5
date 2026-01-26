@@ -91,11 +91,13 @@ function renderStatusSummary(data) {
     const totalEl = document.getElementById('status-total');
     if (!summaryEl || !totalEl) return;
 
-    totalEl.textContent = `Total: ${data.length}`;
-    const counts = groupCounts(data, item => item.status || 'Tidak diketahui');
+    const activeData = data.filter(item => (item.status || '').toLowerCase() !== 'alumni');
+    totalEl.textContent = `Total: ${activeData.length}`;
+    const counts = groupCounts(activeData, item => item.status || 'Tidak diketahui');
 
+    const displayStatuses = STATUS_ORDER.filter(status => status !== 'Alumni');
     const entries = [
-        ...STATUS_ORDER.map(status => [status, counts[status] || 0]),
+        ...displayStatuses.map(status => [status, counts[status] || 0]),
         ...Object.entries(counts).filter(([status]) => !STATUS_ORDER.includes(status))
     ];
 
