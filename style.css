@@ -1503,6 +1503,11 @@ tbody td {
     color: #374151;
 }
 
+.badge-alumni {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
 .badge-mengundurkan-diri {
     background-color: #dbeafe;
     color: #1e40af;
@@ -1888,7 +1893,9 @@ tbody td {
 }
 
 .upload-icon {
-    font-size: 4rem;
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
     margin-bottom: 15px;
 }
 

@@ -4,7 +4,8 @@ const STATUS_ORDER = [
     'Istirahat',
     'Skorsing',
     'Pindah Kampus',
-    'Dikeluarkan'
+    'Dikeluarkan',
+    'Alumni'
 ];
 const ASRAMA_ORDER = [
     'Ghaza 1',
