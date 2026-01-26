@@ -311,9 +311,85 @@ body > * {
 
 .auth-shell {
     min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+}
+
+.auth-layout {
+    width: 100%;
+    max-width: 1120px;
     display: grid;
-    place-items: center;
-    padding: 32px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 32px;
+    align-items: stretch;
+}
+
+.auth-overview {
+    background: linear-gradient(145deg, rgba(42, 124, 111, 0.12), rgba(255, 255, 255, 0.9));
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    border: 1px solid rgba(42, 124, 111, 0.2);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.auth-overview-badge {
+    align-self: flex-start;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(42, 124, 111, 0.15);
+    color: #1f6f63;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+}
+
+.auth-overview h1 {
+    font-size: 2.2rem;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.auth-overview-text {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+}
+
+.auth-overview-list {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.auth-overview-list li {
+    padding-left: 18px;
+    position: relative;
+}
+
+.auth-overview-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--primary-color);
+}
+
+.auth-overview-note {
+    margin-top: auto;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    padding-top: 12px;
+    border-top: 1px solid rgba(42, 124, 111, 0.15);
 }
 
 .auth-brand h2 {
@@ -326,6 +402,35 @@ body > * {
     color: var(--text-secondary);
     font-size: 0.9rem;
     margin-top: 4px;
+}
+
+.auth-request {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+    display: grid;
+    gap: 12px;
+}
+
+.auth-request-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.auth-request-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+    background: #f1f5f9;
 }
 
 /* Overview */
@@ -954,6 +1059,14 @@ body > * {
 
     .app-shell.sidebar-collapsed .sidebar {
         padding-bottom: 12px;
+    }
+
+    .auth-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-overview {
+        padding: 32px;
     }
 }
 

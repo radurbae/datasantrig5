@@ -13,25 +13,51 @@
 </head>
 <body>
     <div class="auth-shell">
-        <div class="auth-card">
-            <div class="auth-brand">
-                <h2> Database Santri</h2>
-                <span>PMDG Kampus 5 Darul Qiyam</span>
+        <div class="auth-layout">
+            <section class="auth-overview">
+                <div class="auth-overview-badge">Sistem Terpadu</div>
+                <h1>Database Santri PMDG Kampus 5</h1>
+                <p class="auth-overview-text">
+                    Pusat data santri yang memudahkan pengelolaan identitas, prestasi, raport mental, serta catatan
+                    pembinaan secara terstruktur, aman, dan mudah dipantau.
+                </p>
+                <ul class="auth-overview-list">
+                    <li>Monitoring perkembangan santri per kelas dan asrama.</li>
+                    <li>Rekap raport mental mingguan yang terstandar.</li>
+                    <li>Manajemen prestasi & catatan dengan master data terkontrol.</li>
+                </ul>
+                <div class="auth-overview-note">
+                    Akses diberikan oleh admin sesuai kebutuhan unit terkait.
+                </div>
+            </section>
+
+            <div class="auth-card">
+                <div class="auth-brand">
+                    <h2> Database Santri</h2>
+                    <span>PMDG Kampus 5 Darul Qiyam</span>
+                </div>
+                <h1>Masuk</h1>
+                <p class="subtitle">Gunakan email dan password yang diberikan admin</p>
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="nama@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="********" required>
+                    </div>
+                    <div id="login-error" class="auth-error" style="display: none;"></div>
+                    <button type="submit" class="btn btn-primary" id="login-submit">Masuk</button>
+                </form>
+                <div class="auth-request">
+                    <p class="auth-request-text">Belum punya akses? Ajukan akses melalui:</p>
+                    <div class="auth-request-actions">
+                        <a class="btn btn-secondary" href="https://wa.me/6285177155097" target="_blank" rel="noopener">WhatsApp</a>
+                        <a class="btn btn-outline" href="mailto:radurbae@gmail.com">Email</a>
+                    </div>
+                </div>
             </div>
-            <h1>Masuk</h1>
-            <p class="subtitle">Gunakan email dan password yang diberikan admin</p>
-            <form id="login-form" class="auth-form">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="nama@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="********" required>
-                </div>
-                <div id="login-error" class="auth-error" style="display: none;"></div>
-                <button type="submit" class="btn btn-primary" id="login-submit">Masuk</button>
-            </form>
         </div>
     </div>
 
