@@ -34,6 +34,15 @@ async function loadSantriData() {
             showError();
             return;
         }
+
+        if (window.currentUserRole === 'wali_kelas') {
+            const waliKelas = (window.currentUserKelas || '').toString().trim().toLowerCase();
+            const santriKelas = (santriData.kelas || '').toString().trim().toLowerCase();
+            if (waliKelas && santriKelas !== waliKelas) {
+                showError();
+                return;
+            }
+        }
         
         displaySantriDetail();
     } catch (error) {

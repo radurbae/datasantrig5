@@ -30,6 +30,10 @@ function normalizeKelas(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
 }
 
+function getWaliKelas() {
+    return normalizeKelas(window.currentUserKelas || '');
+}
+
 function parseKelasKey(kelas) {
     const normalized = normalizeKelas(kelas).replace(/\s+/g, '');
     const match = normalized.match(/^(\d+)([A-Za-z]+)?$/);
@@ -217,6 +221,11 @@ function updateKelasFilter() {
     if (current && kelasList.includes(current)) {
         select.value = current;
     }
+    const waliKelas = getWaliKelas();
+    if (window.currentUserRole === 'wali_kelas' && waliKelas) {
+        select.value = waliKelas;
+        select.disabled = true;
+    }
 }
 
 function renderSantriTable() {
@@ -262,7 +271,15 @@ function renderSantriTable() {
 
 async function loadData() {
     santriData = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
+    const waliKelas = getWaliKelas();
+    if (window.currentUserRole === 'wali_kelas' && waliKelas) {
+        santriData = santriData.filter(s => normalizeKelas(s.kelas) === waliKelas);
+    }
     prestasiData = await getPrestasi();
+    if (window.currentUserRole === 'wali_kelas' && santriData.length) {
+        const allowedIds = new Set(santriData.map(s => s.id));
+        prestasiData = prestasiData.filter(item => allowedIds.has(item.santri_id));
+    }
     santriData.sort(compareSantri);
     await loadMasterData();
     populateSantriDatalist();
@@ -312,7 +329,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('prestasi-tahun').value = getHijriAcademicYear();
 
-    if (role !== 'admin') {
+    const canEdit = role === 'admin' || role === 'wali_kelas';
+    if (!canEdit) {
         document.getElementById('prestasi-form').style.display = 'none';
         document.getElementById('prestasi-readonly').style.display = 'block';
     }
@@ -329,7 +347,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('prestasi-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (role !== 'admin') return;
+        if (!canEdit) return;
 
         if (!confirm('Apakah data ini sudah benar?')) return;
 

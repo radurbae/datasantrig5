@@ -350,7 +350,7 @@ function renderTable() {
     const tbody = document.getElementById('catatan-tbody');
     if (!tbody) return;
 
-    const isAdmin = window.currentUserRole === 'admin';
+    const isAdmin = window.currentUserRole === 'admin' || window.currentUserRole === 'wali_kelas';
     const actionHeader = document.getElementById('catatan-aksi');
     if (actionHeader) {
         actionHeader.style.display = isAdmin ? '' : 'none';
@@ -383,7 +383,21 @@ async function loadData() {
             showError();
             return;
         }
+        if (window.currentUserRole === 'wali_kelas') {
+            const waliKelas = (window.currentUserKelas || '').toString().trim().toLowerCase();
+            const santriKelas = (santriData.kelas || '').toString().trim().toLowerCase();
+            if (waliKelas && santriKelas !== waliKelas) {
+                showError();
+                return;
+            }
+        }
         allSantri = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
+        if (window.currentUserRole === 'wali_kelas') {
+            const waliKelas = (window.currentUserKelas || '').toString().trim().toLowerCase();
+            if (waliKelas) {
+                allSantri = allSantri.filter(s => (s.kelas || '').toString().trim().toLowerCase() === waliKelas);
+            }
+        }
         await loadMasterData();
         catatanData = (await getCatatan()).filter(item => item.santri_id === santriId);
         populateCategorySelect();
@@ -448,7 +462,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('catatan-tahun').value = getHijriAcademicYear();
 
-    if (role !== 'admin') {
+    const canEdit = role === 'admin' || role === 'wali_kelas';
+    if (!canEdit) {
         document.getElementById('catatan-form').style.display = 'none';
         document.getElementById('catatan-readonly').style.display = 'block';
         const actionHeader = document.getElementById('catatan-aksi');
@@ -471,7 +486,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('catatan-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (role !== 'admin') return;
+        if (!canEdit) return;
 
         const kategori = document.getElementById('catatan-kategori').value;
         const payload = {

@@ -13,29 +13,46 @@ async function getSession() {
     return data?.session || null;
 }
 
-async function getUserRole(userId) {
+async function getUserProfile(userId) {
     const client = await waitForSupabaseClient();
-    if (!client) return 'user';
+    if (!client) return { role: 'user', waliKelas: '' };
     const { data, error } = await client
         .from('profiles')
-        .select('role')
+        .select('role, wali_kelas')
         .eq('id', userId)
         .single();
     if (error) {
         console.warn('Role tidak ditemukan, fallback ke user:', error.message);
-        return 'user';
+        return { role: 'user', waliKelas: '' };
     }
-    return data?.role || 'user';
+    return {
+        role: data?.role || 'user',
+        waliKelas: data?.wali_kelas || ''
+    };
 }
 
-function applyRoleUI(role) {
+function applyRoleUI(role, waliKelas) {
     const isAdmin = role === 'admin';
+    const isWali = role === 'wali_kelas';
     document.querySelectorAll('[data-admin-only]').forEach(el => {
         el.style.display = isAdmin ? '' : 'none';
     });
+    if (isWali) {
+        const restricted = ['overview.html', 'form.html', 'master.html', 'master-prestasi.html', 'master-catatan.html', 'bulk-naik-kelas.html'];
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            const href = link.getAttribute('href') || '';
+            if (restricted.includes(href)) {
+                link.style.display = 'none';
+            }
+        });
+    }
     const roleLabel = document.querySelector('[data-role-label]');
     if (roleLabel) {
-        roleLabel.textContent = role ? `Role: ${role}` : '';
+        if (isWali && waliKelas) {
+            roleLabel.textContent = `Role: wali kelas ${waliKelas}`;
+        } else {
+            roleLabel.textContent = role ? `Role: ${role}` : '';
+        }
     }
 }
 
@@ -67,9 +84,11 @@ async function requireAuth(allowedRoles) {
         window.location.href = 'login.html';
         return null;
     }
-    const role = await getUserRole(session.user.id);
+    const profile = await getUserProfile(session.user.id);
+    const role = profile.role;
     window.currentUserRole = role;
-    applyRoleUI(role);
+    window.currentUserKelas = profile.waliKelas;
+    applyRoleUI(role, profile.waliKelas);
     setupSidebarToggle();
     await setupLogoutLink();
     if (Array.isArray(allowedRoles) && !allowedRoles.includes(role)) {

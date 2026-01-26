@@ -9,6 +9,14 @@ function statusClassName(status) {
     return (status || '').toLowerCase().replace(/\s+/g, '-');
 }
 
+function normalizeKelasValue(kelas) {
+    return (kelas || '').toString().trim().replace(/\s+/g, ' ');
+}
+
+function getWaliKelas() {
+    return normalizeKelasValue(window.currentUserKelas || '');
+}
+
 // Initialize list page
 document.addEventListener('DOMContentLoaded', async () => {
     const role = await requireAuth();
@@ -47,6 +55,10 @@ function sortByKelasAndAbsen(a, b) {
 async function loadData() {
     try {
         santriData = await getAllSantri();
+        const waliKelas = getWaliKelas();
+        if (window.currentUserRole === 'wali_kelas' && waliKelas) {
+            santriData = santriData.filter(s => normalizeKelasValue(s.kelas) === waliKelas);
+        }
         santriData.sort(sortByKelasAndAbsen);
         filteredData = [...santriData];
         currentPage = 1;
@@ -108,6 +120,12 @@ function applyDefaultStatusFilter() {
     const statusSelect = document.getElementById('filter-status');
     if (statusSelect && !statusSelect.value) {
         statusSelect.value = 'Aktif';
+    }
+    const waliKelas = getWaliKelas();
+    const filterKelas = document.getElementById('filter-kelas');
+    if (window.currentUserRole === 'wali_kelas' && filterKelas && waliKelas) {
+        filterKelas.value = waliKelas;
+        filterKelas.disabled = true;
     }
     applyFilters('');
 }

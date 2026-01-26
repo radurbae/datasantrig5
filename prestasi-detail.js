@@ -147,7 +147,7 @@ function renderTable() {
     const tbody = document.getElementById('prestasi-tbody');
     if (!tbody) return;
 
-    const isAdmin = window.currentUserRole === 'admin';
+    const isAdmin = window.currentUserRole === 'admin' || window.currentUserRole === 'wali_kelas';
     const actionHeader = document.getElementById('prestasi-aksi');
     if (actionHeader) {
         actionHeader.style.display = isAdmin ? '' : 'none';
@@ -179,6 +179,14 @@ async function loadData() {
         if (!santriData) {
             showError();
             return;
+        }
+        if (window.currentUserRole === 'wali_kelas') {
+            const waliKelas = (window.currentUserKelas || '').toString().trim().toLowerCase();
+            const santriKelas = (santriData.kelas || '').toString().trim().toLowerCase();
+            if (waliKelas && santriKelas !== waliKelas) {
+                showError();
+                return;
+            }
         }
         await loadMasterData();
         prestasiData = (await getPrestasi()).filter(item => item.santri_id === santriId);
@@ -244,7 +252,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('prestasi-tahun').value = getHijriAcademicYear();
 
-    if (role !== 'admin') {
+    const canEdit = role === 'admin' || role === 'wali_kelas';
+    if (!canEdit) {
         document.getElementById('prestasi-form').style.display = 'none';
         document.getElementById('prestasi-readonly').style.display = 'block';
         const actionHeader = document.getElementById('prestasi-aksi');
@@ -259,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('prestasi-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (role !== 'admin') return;
+        if (!canEdit) return;
 
         if (!confirm('Apakah data ini sudah benar?')) return;
 

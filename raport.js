@@ -67,6 +67,10 @@ function normalizeKelas(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
 }
 
+function getWaliKelas() {
+    return normalizeKelas(window.currentUserKelas || '');
+}
+
 function escapeCell(value) {
     return String(value ?? '')
         .replace(/&/g, '&amp;')
@@ -601,6 +605,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupViewPeriodInputs();
 
     santriData = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
+    const waliKelas = getWaliKelas();
+    if (currentRole === 'wali_kelas' && waliKelas) {
+        santriData = santriData.filter(s => normalizeKelas(s.kelas) === waliKelas);
+    }
     santriData.sort(sortSantri);
     await loadReports();
     updateCompletionSummary();
@@ -608,6 +616,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const kelas = params.get('kelas');
     const santriId = params.get('santri');
+
+    if (currentRole === 'wali_kelas' && kelas && normalizeKelas(kelas) !== getWaliKelas()) {
+        window.location.href = 'raport.html';
+        return;
+    }
 
     if (!kelas) {
         renderKelasGrid();
@@ -641,11 +654,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    const canEdit = currentRole === 'admin' || currentRole === 'wali_kelas';
     const form = document.getElementById('raport-form');
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (currentRole !== 'admin') {
-            alert('Hanya admin yang dapat mengisi raport.');
+        if (!canEdit) {
+            alert('Hanya admin atau wali kelas yang dapat mengisi raport.');
             return;
         }
         const confirmed = confirm('Apakah Data Sudah Benar?');
@@ -679,8 +693,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.querySelectorAll('.report-save').forEach(btn => {
         btn.addEventListener('click', async () => {
-            if (currentRole !== 'admin') {
-                alert('Hanya admin yang dapat mengisi raport.');
+            if (!canEdit) {
+                alert('Hanya admin atau wali kelas yang dapat mengisi raport.');
                 return;
             }
             const key = btn.dataset.key;
@@ -705,9 +719,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    setFormDisabled(currentRole !== 'admin');
+    setFormDisabled(!canEdit);
     const modeEl = document.getElementById('report-mode');
-    if (modeEl && currentRole !== 'admin') {
+    if (modeEl && !canEdit) {
         modeEl.textContent = 'Mode: Lihat';
     }
 });

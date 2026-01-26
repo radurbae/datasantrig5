@@ -324,7 +324,7 @@ function setupTabs(data) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const role = await requireAuth();
+    const role = await requireAuth(['admin']);
     if (!role) return;
 
     const data = await getAllSantri();
