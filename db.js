@@ -169,7 +169,8 @@ async function insertSantri(santriData) {
             kelas: santriData.kelas || null,
             no_absen: santriData.noAbsen || null,
             asrama: santriData.asrama || null,
-            konsulat: santriData.konsulat || null
+            konsulat: santriData.konsulat || null,
+            riwayat_kelas: santriData.riwayatKelas || null
         };
         
         const { data, error } = await client
@@ -236,6 +237,10 @@ async function updateSantri(id, santriData) {
             konsulat: santriData.konsulat || null,
             updated_at: new Date().toISOString()
         };
+
+        if (Object.prototype.hasOwnProperty.call(santriData, 'riwayatKelas')) {
+            dataToUpdate.riwayat_kelas = santriData.riwayatKelas;
+        }
         
         const { data, error } = await client
             .from(tableName)
@@ -965,6 +970,7 @@ function convertFromSupabase(supabaseData) {
         noAbsen: supabaseData.no_absen,
         asrama: supabaseData.asrama,
         konsulat: supabaseData.konsulat,
+        riwayatKelas: supabaseData.riwayat_kelas,
         createdAt: supabaseData.created_at,
         updatedAt: supabaseData.updated_at
     };

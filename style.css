@@ -1663,6 +1663,22 @@ tbody td {
     margin-bottom: 30px;
 }
 
+.detail-history {
+    margin-top: 24px;
+    display: grid;
+    gap: 12px;
+}
+
+.detail-history h3 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.detail-history-list {
+    display: grid;
+    gap: 10px;
+}
+
 .detail-actions {
     display: flex;
     gap: 15px;

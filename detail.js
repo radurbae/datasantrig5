@@ -96,6 +96,43 @@ function displaySantriDetail() {
     } else {
         document.getElementById('detail-updated-item').style.display = 'none';
     }
+
+    renderKelasHistory(formatDate);
+}
+
+function parseRiwayatKelas(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) return parsed;
+        } catch (error) {
+            return [];
+        }
+    }
+    return [];
+}
+
+function renderKelasHistory(formatDate) {
+    const container = document.getElementById('detail-history-list');
+    if (!container) return;
+    const history = parseRiwayatKelas(santriData.riwayatKelas);
+    if (!history.length) {
+        container.innerHTML = '<div class="overview-empty">Belum ada riwayat kelas.</div>';
+        return;
+    }
+    container.innerHTML = history.map(entry => {
+        const from = entry.from || '-';
+        const to = entry.to || '-';
+        const dateText = formatDate(entry.date);
+        return `
+            <div class="overview-row">
+                <span>${escapeHtml(from)} -> ${escapeHtml(to)}</span>
+                <strong>${escapeHtml(dateText)}</strong>
+            </div>
+        `;
+    }).join('');
 }
 
 // Show error state

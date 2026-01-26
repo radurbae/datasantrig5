@@ -73,31 +73,43 @@ function populateClassOptions() {
     select.innerHTML = '<option value="">Pilih kelas</option>' + classes.map(cls => formatOption(cls, cls)).join('');
 }
 
-function populateAbsenOptions(kelas) {
-    const select = document.getElementById('bulk-current-absen');
-    if (!select) return;
-    const absens = selectableSantri
-        .filter(item => normalizeKelas(item.kelas) === kelas)
-        .map(item => item.noAbsen)
-        .filter(val => val !== null && val !== undefined && val !== '')
-        .map(val => Number(val))
-        .filter(val => Number.isFinite(val));
-    absens.sort((a, b) => a - b);
-    const unique = [...new Set(absens)];
-    select.innerHTML = '<option value="">Pilih absen</option>' +
-        unique.map(val => formatOption(val, val)).join('');
-}
-
-function populateSantriOptions(kelas, absen) {
+function populateSantriOptions(kelas) {
     const select = document.getElementById('bulk-current-santri');
     if (!select) return;
     const filtered = selectableSantri.filter(item => {
         if (normalizeKelas(item.kelas) !== kelas) return false;
-        if (!absen) return true;
-        return Number(item.noAbsen) === Number(absen);
+        return true;
     });
     select.innerHTML = '<option value="">Pilih santri</option>' +
         filtered.map(item => formatOption(item.nama, item.id)).join('');
+}
+
+function parseRiwayatKelas(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) return parsed;
+        } catch (error) {
+            return [];
+        }
+    }
+    return [];
+}
+
+function buildRiwayatEntry(fromClass, toClass) {
+    return {
+        from: fromClass || '-',
+        to: toClass || '-',
+        date: new Date().toISOString()
+    };
+}
+
+function applyRiwayatKelas(santri, fromClass, toClass) {
+    const history = parseRiwayatKelas(santri.riwayatKelas);
+    history.push(buildRiwayatEntry(fromClass, toClass));
+    return history;
 }
 
 function setManualInputsState(isFinal) {
@@ -143,6 +155,7 @@ async function submitManualPromotion(e) {
 
     const updated = { ...currentSelection };
     updated.kelas = finalClass;
+    updated.riwayatKelas = applyRiwayatKelas(currentSelection, currentSelection.kelas, finalClass);
     if (isFinalClass(currentSelection.kelas)) {
         updated.status = 'Alumni';
     }
@@ -166,9 +179,7 @@ async function submitManualPromotion(e) {
 function resetManualForm() {
     const form = document.getElementById('bulk-manual-form');
     if (form) form.reset();
-    const absenSelect = document.getElementById('bulk-current-absen');
     const santriSelect = document.getElementById('bulk-current-santri');
-    if (absenSelect) absenSelect.innerHTML = '<option value="">Pilih absen</option>';
     if (santriSelect) santriSelect.innerHTML = '<option value="">Pilih santri</option>';
     setManualInputsState(false);
     currentSelection = null;
@@ -298,6 +309,7 @@ async function processCsvMapping() {
 
         const updated = { ...santri };
         updated.kelas = finalClass;
+        updated.riwayatKelas = applyRiwayatKelas(santri, santri.kelas || kelasLama, finalClass);
         if (isFinalClass(kelasLama)) {
             updated.status = 'Alumni';
         }
@@ -330,7 +342,6 @@ async function refreshData() {
 
 function setupManualHandlers() {
     const classSelect = document.getElementById('bulk-current-class');
-    const absenSelect = document.getElementById('bulk-current-absen');
     const santriSelect = document.getElementById('bulk-current-santri');
     const form = document.getElementById('bulk-manual-form');
     const resetBtn = document.getElementById('bulk-manual-reset');
@@ -338,17 +349,7 @@ function setupManualHandlers() {
     if (classSelect) {
         classSelect.addEventListener('change', () => {
             const kelas = normalizeKelas(classSelect.value);
-            populateAbsenOptions(kelas);
-            populateSantriOptions(kelas, '');
-            currentSelection = null;
-            setManualInputsState(false);
-        });
-    }
-
-    if (absenSelect) {
-        absenSelect.addEventListener('change', () => {
-            const kelas = normalizeKelas(classSelect?.value || '');
-            populateSantriOptions(kelas, absenSelect.value);
+            populateSantriOptions(kelas);
             currentSelection = null;
             setManualInputsState(false);
         });

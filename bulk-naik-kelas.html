@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bulk Naik Kelas - Database Santri PMDG Kampus 5 Darul Qiyam</title>
+    <title>Kenaikan Kelas - Database Santri PMDG Kampus 5 Darul Qiyam</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
                 <a href="prestasi.html" class="sidebar-link"> Prestasi</a>
                 <a href="catatan.html" class="sidebar-link"> Catatan</a>
                 <a href="master-prestasi.html" class="sidebar-link" data-admin-only> Master Prestasi</a>
-                <a href="bulk-naik-kelas.html" class="sidebar-link active" data-admin-only> Bulk Naik Kelas</a>
+                <a href="bulk-naik-kelas.html" class="sidebar-link active" data-admin-only> Kenaikan Kelas</a>
                 <a href="master-catatan.html" class="sidebar-link" data-admin-only> Master Catatan</a>
             </nav>
             <div class="sidebar-footer">
@@ -39,14 +39,14 @@
         <main class="main-content">
             <div class="content-wrap">
                 <header class="page-header">
-                    <h1>Bulk Naik Kelas</h1>
+                    <h1>Kenaikan Kelas</h1>
                     <p class="subtitle">Kelola kenaikan kelas dan alumni secara massal.</p>
                 </header>
 
                 <section class="overview-section">
                     <div class="overview-card">
                         <div class="overview-header">
-                            <h2>Naik Kelas Manual</h2>
+                            <h2>Kenaikan Kelas Manual</h2>
                             <span class="overview-total" id="bulk-manual-note">Kelas 6 otomatis menjadi Alumni.</span>
                         </div>
                         <form id="bulk-manual-form" class="report-form" data-admin-only>
@@ -55,12 +55,6 @@
                                     <label for="bulk-current-class">Pilih Kelas</label>
                                     <select id="bulk-current-class" class="filter-select" required>
                                         <option value="">Pilih kelas</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="bulk-current-absen">Pilih Nomor Absen</label>
-                                    <select id="bulk-current-absen" class="filter-select" required>
-                                        <option value="">Pilih absen</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
@@ -110,6 +104,7 @@
                         <div class="form-actions">
                             <button class="btn btn-primary" id="bulk-csv-process" data-admin-only>Proses CSV</button>
                             <button class="btn btn-secondary" id="bulk-csv-clear" data-admin-only>Reset</button>
+                            <a class="btn btn-outline" href="kenaikan-kelas-template.csv" download>Download Template CSV</a>
                         </div>
                         <div id="bulk-csv-result" class="report-summary"></div>
                     </div>
