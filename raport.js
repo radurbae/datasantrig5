@@ -67,8 +67,12 @@ function normalizeKelas(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
 }
 
-function getWaliKelas() {
-    return normalizeKelas(window.currentUserKelas || '');
+function normalizeKelasKey(kelas) {
+    return (kelas || '').toString().trim().replace(/\s+/g, '').toUpperCase();
+}
+
+function getWaliKelasKey() {
+    return normalizeKelasKey(window.currentUserKelas || '');
 }
 
 function escapeCell(value) {
@@ -513,7 +517,8 @@ function renderSantriList(kelas) {
     const subtitle = document.getElementById('kelas-subtitle');
     if (!section || !tbody) return;
 
-    const filtered = santriData.filter(s => normalizeKelas(s.kelas) === kelas);
+    const kelasKey = normalizeKelasKey(kelas);
+    const filtered = santriData.filter(s => normalizeKelasKey(s.kelas) === kelasKey);
     if (title) title.textContent = `Kelas ${kelas}`;
     if (subtitle) subtitle.textContent = `Bulan ${viewMonthValue} • Minggu ${viewWeekValue}`;
 
@@ -605,9 +610,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupViewPeriodInputs();
 
     santriData = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
-    const waliKelas = getWaliKelas();
-    if (currentRole === 'wali_kelas' && waliKelas) {
-        santriData = santriData.filter(s => normalizeKelas(s.kelas) === waliKelas);
+    const waliKelasKey = getWaliKelasKey();
+    if (currentRole === 'wali_kelas' && waliKelasKey) {
+        santriData = santriData.filter(s => normalizeKelasKey(s.kelas) === waliKelasKey);
     }
     santriData.sort(sortSantri);
     await loadReports();
@@ -617,7 +622,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const kelas = params.get('kelas');
     const santriId = params.get('santri');
 
-    if (currentRole === 'wali_kelas' && kelas && normalizeKelas(kelas) !== getWaliKelas()) {
+    if (currentRole === 'wali_kelas' && kelas && normalizeKelasKey(kelas) !== getWaliKelasKey()) {
         window.location.href = 'raport.html';
         return;
     }
@@ -647,7 +652,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (downloadClassBtn) {
         downloadClassBtn.addEventListener('click', () => {
             if (!kelas) return;
-            const target = santriData.filter(s => normalizeKelas(s.kelas) === kelas);
+            const target = santriData.filter(s => normalizeKelasKey(s.kelas) === normalizeKelasKey(kelas));
             const safeKelas = normalizeKelas(kelas).replace(/\s+/g, '-');
             const filename = `raport-mental-${viewMonthValue}-minggu-${viewWeekValue}-${safeKelas}.xls`;
             exportToExcel(buildExportRows(target), filename);

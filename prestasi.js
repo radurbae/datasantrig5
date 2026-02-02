@@ -30,8 +30,20 @@ function normalizeKelas(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
 }
 
-function getWaliKelas() {
-    return normalizeKelas(window.currentUserKelas || '');
+function normalizeKelasKey(kelas) {
+    return (kelas || '').toString().trim().replace(/\s+/g, '').toUpperCase();
+}
+
+function getWaliKelasKey() {
+    return normalizeKelasKey(window.currentUserKelas || '');
+}
+
+function setSelectValueByKelasKey(select, kelasKey) {
+    if (!select || !kelasKey) return;
+    const match = Array.from(select.options).find(option => normalizeKelasKey(option.value) === kelasKey);
+    if (match) {
+        select.value = match.value;
+    }
 }
 
 function parseKelasKey(kelas) {
@@ -221,9 +233,9 @@ function updateKelasFilter() {
     if (current && kelasList.includes(current)) {
         select.value = current;
     }
-    const waliKelas = getWaliKelas();
-    if (window.currentUserRole === 'wali_kelas' && waliKelas) {
-        select.value = waliKelas;
+    const waliKelasKey = getWaliKelasKey();
+    if (window.currentUserRole === 'wali_kelas' && waliKelasKey) {
+        setSelectValueByKelasKey(select, waliKelasKey);
         select.disabled = true;
     }
 }
@@ -271,9 +283,9 @@ function renderSantriTable() {
 
 async function loadData() {
     santriData = (await getAllSantri()).filter(s => (s.status || '').toLowerCase() === 'aktif');
-    const waliKelas = getWaliKelas();
-    if (window.currentUserRole === 'wali_kelas' && waliKelas) {
-        santriData = santriData.filter(s => normalizeKelas(s.kelas) === waliKelas);
+    const waliKelasKey = getWaliKelasKey();
+    if (window.currentUserRole === 'wali_kelas' && waliKelasKey) {
+        santriData = santriData.filter(s => normalizeKelasKey(s.kelas) === waliKelasKey);
     }
     prestasiData = await getPrestasi();
     if (window.currentUserRole === 'wali_kelas' && santriData.length) {

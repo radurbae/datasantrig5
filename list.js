@@ -13,8 +13,20 @@ function normalizeKelasValue(kelas) {
     return (kelas || '').toString().trim().replace(/\s+/g, ' ');
 }
 
-function getWaliKelas() {
-    return normalizeKelasValue(window.currentUserKelas || '');
+function normalizeKelasKey(kelas) {
+    return (kelas || '').toString().trim().replace(/\s+/g, '').toUpperCase();
+}
+
+function getWaliKelasKey() {
+    return normalizeKelasKey(window.currentUserKelas || '');
+}
+
+function setSelectValueByKelasKey(select, kelasKey) {
+    if (!select || !kelasKey) return;
+    const match = Array.from(select.options).find(option => normalizeKelasKey(option.value) === kelasKey);
+    if (match) {
+        select.value = match.value;
+    }
 }
 
 // Initialize list page
@@ -55,9 +67,9 @@ function sortByKelasAndAbsen(a, b) {
 async function loadData() {
     try {
         santriData = await getAllSantri();
-        const waliKelas = getWaliKelas();
-        if (window.currentUserRole === 'wali_kelas' && waliKelas) {
-            santriData = santriData.filter(s => normalizeKelasValue(s.kelas) === waliKelas);
+        const waliKelasKey = getWaliKelasKey();
+        if (window.currentUserRole === 'wali_kelas' && waliKelasKey) {
+            santriData = santriData.filter(s => normalizeKelasKey(s.kelas) === waliKelasKey);
         }
         santriData.sort(sortByKelasAndAbsen);
         filteredData = [...santriData];
@@ -121,10 +133,10 @@ function applyDefaultStatusFilter() {
     if (statusSelect && !statusSelect.value) {
         statusSelect.value = 'Aktif';
     }
-    const waliKelas = getWaliKelas();
+    const waliKelasKey = getWaliKelasKey();
     const filterKelas = document.getElementById('filter-kelas');
-    if (window.currentUserRole === 'wali_kelas' && filterKelas && waliKelas) {
-        filterKelas.value = waliKelas;
+    if (window.currentUserRole === 'wali_kelas' && filterKelas && waliKelasKey) {
+        setSelectValueByKelasKey(filterKelas, waliKelasKey);
         filterKelas.disabled = true;
     }
     applyFilters('');
