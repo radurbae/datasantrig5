@@ -31,7 +31,7 @@ function normalizeKelas(kelas) {
 }
 
 function normalizeKelasKey(kelas) {
-    return (kelas || '').toString().trim().replace(/\s+/g, '').toUpperCase();
+    return (kelas || '').toString().trim().replace(/[^0-9A-Za-z]/g, '').toUpperCase();
 }
 
 function getWaliKelasKey() {
