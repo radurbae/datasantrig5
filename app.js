@@ -1,6 +1,6 @@
-// Database Santri Management System
+// Sistem kelola data santri
 
-// State management
+// Data utama
 let santriData = [];
 let editingId = null;
 let filteredData = [];
@@ -9,7 +9,7 @@ function statusClassName(status) {
     return (status || '').toLowerCase().replace(/\s+/g, '-');
 }
 
-// Initialize application
+// Mulai aplikasi
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     setupEventListeners();
@@ -17,21 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
     updateFilterOptions();
 });
 
-// Load data from localStorage
+// Ambil data dari localStorage
 function loadData() {
     const stored = localStorage.getItem('santriData');
     santriData = stored ? JSON.parse(stored) : [];
     filteredData = [...santriData];
 }
 
-// Save data to localStorage
+// Simpan data ke localStorage
 function saveData() {
     localStorage.setItem('santriData', JSON.stringify(santriData));
     updateFilterOptions();
     updateStats();
 }
 
-// Setup event listeners
+// Pasang event listener
 function setupEventListeners() {
     const form = document.getElementById('santri-form');
     const cancelBtn = document.getElementById('cancel-btn');
@@ -59,7 +59,7 @@ function setupEventListeners() {
     });
 }
 
-// Handle form submission
+// Proses submit form
 function handleFormSubmit(e) {
     e.preventDefault();
 
@@ -84,13 +84,13 @@ function handleFormSubmit(e) {
     };
 
     if (editingId) {
-        // Update existing data
+        // Update data yang udah ada
         const index = santriData.findIndex(s => s.id === editingId);
         if (index !== -1) {
             santriData[index] = formData;
         }
     } else {
-        // Add new data
+        // Tambah data baru
         santriData.push(formData);
     }
 
@@ -100,7 +100,7 @@ function handleFormSubmit(e) {
     showNotification(editingId ? 'Data berhasil diupdate!' : 'Data berhasil ditambahkan!', 'success');
 }
 
-// Reset form
+// Balikin form
 function resetForm() {
     document.getElementById('santri-form').reset();
     document.getElementById('edit-id').value = '';
@@ -110,7 +110,7 @@ function resetForm() {
     document.getElementById('cancel-btn').style.display = 'none';
 }
 
-// Render table
+// Tampilkan tabel
 function renderTable() {
     const tbody = document.getElementById('santri-tbody');
     
@@ -144,7 +144,7 @@ function renderTable() {
     updateStats();
 }
 
-// Edit santri
+// Edit data santri
 function editSantri(id) {
     const santri = santriData.find(s => s.id === id);
     if (!santri) return;
@@ -168,11 +168,11 @@ function editSantri(id) {
     document.getElementById('submit-btn').textContent = 'Update Data';
     document.getElementById('cancel-btn').style.display = 'inline-block';
 
-    // Scroll to form
+    // Scroll ke form
     document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Delete santri
+// Hapus santri
 function deleteSantri(id) {
     if (!confirm('Apakah Anda yakin ingin menghapus data santri ini?')) {
         return;
@@ -187,7 +187,7 @@ function deleteSantri(id) {
     }
 }
 
-// Show detail modal
+// Tampilkan modal detail
 function showDetail(id) {
     const santri = santriData.find(s => s.id === id);
     if (!santri) return;
@@ -281,26 +281,26 @@ function showDetail(id) {
     modal.classList.add('show');
 }
 
-// Handle search
+// Proses pencarian
 function handleSearch() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
     applyFilters(searchTerm);
 }
 
-// Handle filter
+// Proses filter
 function handleFilter() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
     applyFilters(searchTerm);
 }
 
-// Apply all filters
+// Terapkan semua filter
 function applyFilters(searchTerm = '') {
     const filterRayon = document.getElementById('filter-rayon').value;
     const filterKelas = document.getElementById('filter-kelas').value;
     const filterStatus = document.getElementById('filter-status').value;
 
     filteredData = santriData.filter(santri => {
-        // Search filter
+        // Filter pencarian
         const matchesSearch = !searchTerm || 
             santri.nama.toLowerCase().includes(searchTerm) ||
             santri.kelas.toLowerCase().includes(searchTerm) ||
@@ -308,13 +308,13 @@ function applyFilters(searchTerm = '') {
             santri.daerah.toLowerCase().includes(searchTerm) ||
             (santri.alamat && santri.alamat.toLowerCase().includes(searchTerm));
 
-        // Rayon filter
+        // Filter rayon
         const matchesRayon = !filterRayon || santri.rayon === filterRayon;
 
-        // Kelas filter
+        // Filter kelas
         const matchesKelas = !filterKelas || santri.kelas === filterKelas;
 
-        // Status filter
+        // Filter status
         const matchesStatus = !filterStatus || santri.status === filterStatus;
 
         return matchesSearch && matchesRayon && matchesKelas && matchesStatus;
@@ -323,7 +323,7 @@ function applyFilters(searchTerm = '') {
     renderTable();
 }
 
-// Update filter options
+// Update pilihan filter
 function updateFilterOptions() {
     const rayons = [...new Set(santriData.map(s => s.rayon).filter(Boolean))].sort();
     const kelas = [...new Set(santriData.map(s => s.kelas).filter(Boolean))].sort();
@@ -331,7 +331,7 @@ function updateFilterOptions() {
     const rayonSelect = document.getElementById('filter-rayon');
     const kelasSelect = document.getElementById('filter-kelas');
 
-    // Update rayon options
+    // Update pilihan rayon
     const currentRayon = rayonSelect.value;
     rayonSelect.innerHTML = '<option value="">Semua Rayon</option>' +
         rayons.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
@@ -339,7 +339,7 @@ function updateFilterOptions() {
         rayonSelect.value = currentRayon;
     }
 
-    // Update kelas options
+    // Update pilihan kelas
     const currentKelas = kelasSelect.value;
     kelasSelect.innerHTML = '<option value="">Semua Kelas</option>' +
         kelas.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
@@ -348,7 +348,7 @@ function updateFilterOptions() {
     }
 }
 
-// Update stats
+// Update statistik
 function updateStats() {
     const total = santriData.length;
     const filtered = filteredData.length;
@@ -358,9 +358,9 @@ function updateStats() {
     document.getElementById('total-count').textContent = statsText;
 }
 
-// Show notification
+// Tampilkan notifikasi
 function showNotification(message, type = 'info') {
-    // Create notification element
+    // Bikin elemen notifikasi
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
@@ -376,7 +376,7 @@ function showNotification(message, type = 'info') {
     `;
     notification.textContent = message;
 
-    // Add animation style if not exists
+    // Tambahin style animasi kalau belum ada
     if (!document.getElementById('notification-style')) {
         const style = document.createElement('style');
         style.id = 'notification-style';
@@ -415,7 +415,7 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Escape HTML to prevent XSS
+// Amankan HTML biar gak kena XSS
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -423,7 +423,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Make functions available globally for onclick handlers
+// Biar fungsi bisa dipanggil global dari onclick
 window.editSantri = editSantri;
 window.deleteSantri = deleteSantri;
 window.showDetail = showDetail;

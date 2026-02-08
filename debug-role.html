@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Role - Data Santri</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="env.js"></script>
+    <script src="config.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #2563eb;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .status-ok {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .status-warning {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f9fafb;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Debug Role Wali Kelas</h1>
+
+    <div class="card">
+        <h2>1. Status Login</h2>
+        <div id="login-status">Checking...</div>
+    </div>
+
+    <div class="card">
+        <h2>2. Data Session</h2>
+        <pre id="session-data">Loading...</pre>
+    </div>
+
+    <div class="card">
+        <h2>3. Data Profile dari Database</h2>
+        <pre id="profile-data">Loading...</pre>
+    </div>
+
+    <div class="card">
+        <h2>4. Variable Global</h2>
+        <table>
+            <tr>
+                <th>Variable</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>window.currentUserRole</td>
+                <td id="var-role">-</td>
+            </tr>
+            <tr>
+                <td>window.currentUserKelas</td>
+                <td id="var-kelas">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>5. Test Insert ke Database</h2>
+        <p>Klik tombol untuk test insert:</p>
+        <button id="btn-raport">Test Insert Raport Mental</button>
+        <button id="btn-prestasi">Test Insert Prestasi</button>
+        <button id="btn-catatan">Test Insert Catatan</button>
+        <pre id="test-result">Hasil test akan muncul di sini...</pre>
+    </div>
+
+    <div class="card">
+        <h2>6. Cek Tabel Profiles</h2>
+        <button id="btn-profiles">Cek Tabel Profiles</button>
+        <pre id="profiles-structure">Klik tombol di atas...</pre>
+    </div>
+
+    <script>
+        // Pakai window.supabaseClient dari config.js, jangan bikin baru
+        let currentSession = null;
+        let currentProfile = null;
+
+        async function waitForClient() {
+            for (let i = 0; i < 30; i++) {
+                if (window.supabaseClient) return window.supabaseClient;
+                await new Promise(r => setTimeout(r, 100));
+            }
+            return null;
+        }
+
+        async function init() {
+            const client = await waitForClient();
+
+            if (!client) {
+                document.getElementById('login-status').innerHTML =
+                    '<span class="status-error">❌ Supabase client tidak tersedia</span>';
+                return;
+            }
+
+            // Cek sesi
+            const { data: sessionData, error: sessionError } = await client.auth.getSession();
+
+            if (sessionError) {
+                document.getElementById('login-status').innerHTML =
+                    `<span class="status-error">❌ Error: ${sessionError.message}</span>`;
+                return;
+            }
+
+            currentSession = sessionData?.session;
+
+            if (!currentSession) {
+                document.getElementById('login-status').innerHTML =
+                    '<span class="status-warning">⚠️ Belum login. <a href="login.html">Login dulu</a></span>';
+                document.getElementById('session-data').textContent = 'Tidak ada session';
+                return;
+            }
+
+            document.getElementById('login-status').innerHTML =
+                '<span class="status-ok">✅ Sudah login</span>';
+
+            document.getElementById('session-data').textContent = JSON.stringify({
+                user_id: currentSession.user.id,
+                email: currentSession.user.email
+            }, null, 2);
+
+            // Ambil profil dari database
+            const { data: profileData, error: profileError } = await client
+                .from('profiles')
+                .select('*')
+                .eq('id', currentSession.user.id)
+                .single();
+
+            if (profileError) {
+                document.getElementById('profile-data').textContent =
+                    `Error: ${profileError.message}\n\nKemungkinan user belum punya profile di tabel profiles.`;
+            } else {
+                currentProfile = profileData;
+                document.getElementById('profile-data').textContent = JSON.stringify(profileData, null, 2);
+
+                window.currentUserRole = profileData.role || 'user';
+                window.currentUserKelas = profileData.wali_kelas || '';
+            }
+
+            // Update tampilan
+            const role = window.currentUserRole || '(tidak ada)';
+            const kelas = window.currentUserKelas || '(tidak ada)';
+
+            document.getElementById('var-role').innerHTML =
+                role === 'wali_kelas' ? `<span class="status-ok">${role} ✅</span>` :
+                    role === 'admin' ? `<span class="status-ok">${role} ✅</span>` :
+                        `<span class="status-warning">${role}</span>`;
+
+            document.getElementById('var-kelas').innerHTML =
+                kelas && kelas !== '(tidak ada)' ? `<span class="status-ok">${kelas} ✅</span>` :
+                    `<span class="status-error">${kelas} ⚠️</span>`;
+        }
+
+        async function testInsert(table, payload, useInsert) {
+            const result = document.getElementById('test-result');
+            result.textContent = `Testing insert ke ${table}...`;
+
+            const client = window.supabaseClient;
+            if (!client) {
+                result.textContent = 'Error: Supabase client tidak tersedia';
+                return;
+            }
+
+            try {
+                const { data: santri } = await client.from('santri').select('id').limit(1).single();
+                if (!santri) {
+                    result.textContent = 'Error: Tidak ada data santri';
+                    return;
+                }
+                payload.santri_id = santri.id;
+
+                // Selalu pakai insert simpel buat tes izin
+                const response = await client.from(table).insert([payload]).select().single();
+
+                if (response.error) {
+                    // Cek ini error izin atau bukan
+                    const isPermissionError = response.error.message.includes('policy') ||
+                        response.error.code === '42501';
+                    const icon = isPermissionError ? '🔒' : '❌';
+                    result.innerHTML = `<span class="status-error">${icon} GAGAL:</span>\n${JSON.stringify(response.error, null, 2)}`;
+                } else {
+                    result.innerHTML = `<span class="status-ok">✅ BERHASIL INSERT:</span>\n${JSON.stringify(response.data, null, 2)}\n\n⚠️ Jangan lupa hapus data test ini dari database!`;
+                }
+            } catch (err) {
+                result.textContent = `Error: ${err.message}`;
+            }
+        }
+
+        async function checkProfiles() {
+            const result = document.getElementById('profiles-structure');
+            const client = window.supabaseClient;
+
+            const { data, error } = await client.from('profiles').select('*').limit(5);
+            if (error) {
+                result.innerHTML = `<span class="status-error">Error:</span>\n${JSON.stringify(error, null, 2)}`;
+            } else {
+                result.innerHTML = `<span class="status-ok">Data profiles:</span>\n${JSON.stringify(data, null, 2)}`;
+            }
+        }
+
+        // Listener event pakai data lengkap
+        document.getElementById('btn-raport').addEventListener('click', () => {
+            testInsert('raport_mental', { month: '2026-01-01', week: 1, kepondokmodernan_score: 40, kepondokmodernan_note: 'Test' }, true);
+        });
+        document.getElementById('btn-prestasi').addEventListener('click', () => {
+            testInsert('prestasi_santri', { nama_kegiatan: 'TEST DEBUG', kategori_kegiatan: 'OPPM', keterangan: 'Test Wali Kelas', tahun_ajaran: '1446-1447' }, false);
+        });
+        document.getElementById('btn-catatan').addEventListener('click', () => {
+            testInsert('catatan_santri', { kategori: 'OPPM', sub_kategori: 'Keamanan', keterangan: 'Anggota', tahun_ajaran: '1446-1447' }, false);
+        });
+        document.getElementById('btn-profiles').addEventListener('click', checkProfiles);
+
+        init();
+    </script>
+</body>
+
+</html>

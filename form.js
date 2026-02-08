@@ -1,8 +1,8 @@
-// Form Page - Input/Edit Data Santri
+// Halaman form buat input/edit data santri
 
 let editingId = null;
 
-// Initialize form page
+// Mulai halaman form
 document.addEventListener('DOMContentLoaded', async () => {
     const role = await requireAuth(['admin']);
     if (!role) return;
@@ -10,19 +10,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkEditMode();
 });
 
-// Check if we're in edit mode (from URL parameter)
+// Cek lagi mode edit gak (dari parameter URL)
 async function checkEditMode() {
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit');
     
     if (editId) {
-        // Wait for Supabase to initialize
+        // Tunggu Supabase siap
         await new Promise(resolve => setTimeout(resolve, 500));
         await loadSantriForEdit(editId);
     }
 }
 
-// Setup event listeners for form
+// Pasang event listener buat form
 function setupFormListeners() {
     const form = document.getElementById('santri-form');
     const cancelBtn = document.getElementById('cancel-btn');
@@ -36,11 +36,11 @@ function setupFormListeners() {
     }
 }
 
-// Data operations now handled by db.js (Supabase)
-// Functions getSantriData() and saveSantriData() removed
-// Use getAllSantri(), insertSantri(), updateSantri() from db.js instead
+// Operasi data sekarang ditangani db.js (Supabase)
+// Fungsi getSantriData() dan saveSantriData() udah dihapus
+// Pakai getAllSantri(), insertSantri(), updateSantri() dari db.js
 
-// Handle form submission
+// Proses submit form
 async function handleFormSubmit(e) {
     e.preventDefault();
 
@@ -49,7 +49,7 @@ async function handleFormSubmit(e) {
         return;
     }
 
-    // Disable submit button during processing
+    // Matiin tombol submit pas lagi proses
     const submitBtn = document.getElementById('submit-btn');
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
@@ -81,7 +81,7 @@ async function handleFormSubmit(e) {
         let result;
         
         if (editingId) {
-            // Update existing data
+            // Update data yang udah ada
             result = await updateSantri(editingId, formData);
             if (result) {
                 showNotification('Data berhasil diupdate!', 'success');
@@ -94,7 +94,7 @@ async function handleFormSubmit(e) {
                 submitBtn.textContent = originalText;
             }
         } else {
-            // Add new data
+            // Tambah data baru
             result = await insertSantri(formData);
             if (result) {
                 showNotification('Data berhasil ditambahkan!', 'success');
@@ -144,7 +144,7 @@ function validateForm() {
     return errors;
 }
 
-// Load santri data for editing
+// Ambil data santri buat diedit
 async function loadSantriForEdit(id) {
     try {
         const santri = await getSantriById(id);
@@ -180,7 +180,7 @@ async function loadSantriForEdit(id) {
     }
 }
 
-// Reset form
+// Balikin form
 function resetForm() {
     document.getElementById('santri-form').reset();
     document.getElementById('edit-id').value = '';
@@ -189,21 +189,21 @@ function resetForm() {
     document.getElementById('submit-btn').textContent = 'Tambah Data';
     document.getElementById('cancel-btn').style.display = 'none';
     
-    // Remove edit parameter from URL
+    // Hapus parameter edit dari URL
     if (window.location.search.includes('edit=')) {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 }
 
-// Show notification
+// Tampilkan notifikasi
 function showNotification(message, type = 'info') {
-    // Remove existing notification if any
+    // Hapus notifikasi lama kalau ada
     const existing = document.querySelector('.notification');
     if (existing) {
         existing.remove();
     }
 
-    // Create notification element
+    // Bikin elemen notifikasi
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.style.cssText = `
@@ -221,7 +221,7 @@ function showNotification(message, type = 'info') {
     `;
     notification.textContent = message;
 
-    // Add animation style if not exists
+    // Tambahin style animasi kalau belum ada
     if (!document.getElementById('notification-style')) {
         const style = document.createElement('style');
         style.id = 'notification-style';

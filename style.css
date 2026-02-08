@@ -63,7 +63,7 @@ body > * {
     margin: 0;
 }
 
-/* App Shell */
+/* Kerangka aplikasi */
 .app-shell {
     display: flex;
     flex-direction: column;
@@ -433,7 +433,7 @@ body > * {
     background: #f1f5f9;
 }
 
-/* Overview */
+/* Bagian overview */
 .overview-section {
     margin-bottom: 30px;
 }
@@ -676,7 +676,7 @@ body > * {
     color: #0f766e;
 }
 
-/* Raport */
+/* Bagian raport */
 .report-filter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1070,7 +1070,7 @@ body > * {
     }
 }
 
-/* Page Header */
+/* Header halaman */
 header.page-header {
     text-align: left;
     margin-bottom: 30px;
@@ -1092,8 +1092,8 @@ header.page-header h1 {
     font-size: 1rem;
 }
 
-/* Landing Page Styles */
-/* Landing Page Styles */
+/* Gaya halaman awal */
+/* Gaya halaman awal */
 .landing-section {
     margin-top: 20px;
 }
@@ -1154,7 +1154,7 @@ header.page-header h1 {
     width: 100%;
 }
 
-/* Card Styles */
+/* Gaya kartu */
 .form-card,
 .search-card,
 .table-card {
@@ -1188,7 +1188,7 @@ header.page-header h1 {
     color: var(--text-secondary);
 }
 
-/* Form Styles */
+/* Gaya formulir */
 #santri-form {
     display: flex;
     flex-direction: column;
@@ -1251,7 +1251,7 @@ header.page-header h1 {
     margin-top: 10px;
 }
 
-/* Button Styles */
+/* Gaya tombol */
 .btn {
     padding: 11px 22px;
     border: 1px solid transparent;
@@ -1330,7 +1330,7 @@ header.page-header h1 {
     box-shadow: 0 12px 24px -20px rgba(15, 23, 42, 0.45);
 }
 
-/* Search Section */
+/* Bagian pencarian */
 .search-section {
     margin-bottom: 30px;
 }
@@ -1415,7 +1415,7 @@ header.page-header h1 {
     color: var(--text-secondary);
 }
 
-/* Table Styles */
+/* Gaya tabel */
 .table-container {
     overflow-x: auto;
     margin-top: 20px;
@@ -1524,7 +1524,7 @@ tbody td {
     color: #991b1b;
 }
 
-/* Modal Styles */
+/* Gaya modal */
 .modal {
     display: none;
     position: fixed;
@@ -1617,7 +1617,7 @@ tbody td {
     color: var(--text-primary);
 }
 
-/* Detail Page Styles */
+/* Gaya halaman detail */
 .detail-section {
     margin-top: 20px;
 }
@@ -1693,7 +1693,7 @@ tbody td {
     flex-wrap: wrap;
 }
 
-/* Responsive Design */
+/* Tampilan responsif */
 @media (max-width: 768px) {
     body {
         padding: 0;
@@ -1824,7 +1824,7 @@ tbody td {
     }
 }
 
-/* Import Page Styles */
+/* Gaya halaman import */
 .import-section {
     margin-top: 20px;
 }
@@ -1892,7 +1892,7 @@ tbody td {
     text-align: center;
 }
 
-/* Upload Area */
+/* Area unggah */
 .upload-area {
     border: 3px dashed var(--border-color);
     border-radius: 12px;
@@ -1998,7 +1998,7 @@ tbody td {
     cursor: pointer;
 }
 
-/* Preview Section */
+/* Bagian pratinjau */
 .preview-section {
     margin-top: 30px;
 }
@@ -2026,7 +2026,7 @@ tbody td {
     background-color: #fee2e2 !important;
 }
 
-/* Import Result Modal */
+/* Modal hasil import */
 .import-result {
     max-width: 600px;
 }
@@ -2093,7 +2093,7 @@ tbody td {
     justify-content: center;
 }
 
-/* Scrollbar Styling */
+/* Gaya scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;

@@ -1,5 +1,5 @@
-// Database Service Layer - Supabase Operations
-// File ini menangani semua operasi database untuk data santri
+// Lapisan layanan basis data buat operasi Supabase
+// File ini ngurus semua operasi basis data santri
 
 const DEFAULT_TABLE_NAME = 'santri';
 
@@ -66,8 +66,8 @@ async function upsertRaportMental(payload) {
 }
 
 /**
- * Get all santri data from Supabase
- * @returns {Promise<Array>} Array of santri data (converted to camelCase)
+ * Ambil semua data santri dari Supabase
+ * @returns {Promise<Array>} Daftar data santri (udah jadi camelCase)
  */
 async function getAllSantri() {
     try {
@@ -91,7 +91,7 @@ async function getAllSantri() {
             return [];
         }
         
-        // Convert from Supabase format (snake_case) to app format (camelCase)
+        // Ubah dari format Supabase (snake_case) ke format aplikasi (camelCase)
         return convertArrayFromSupabase(data || []);
     } catch (error) {
         console.error('Error in getAllSantri:', error);
@@ -103,9 +103,9 @@ async function getAllSantri() {
 }
 
 /**
- * Get single santri by ID
- * @param {string} id - Santri ID
- * @returns {Promise<Object|null>} Santri data (converted to camelCase) or null
+ * Ambil satu data santri dari ID
+ * @param {string} id - ID santri
+ * @returns {Promise<Object|null>} Data santri (udah jadi camelCase) atau null
  */
 async function getSantriById(id) {
     try {
@@ -126,7 +126,7 @@ async function getSantriById(id) {
             return null;
         }
         
-        // Convert from Supabase format to app format
+        // Ubah dari format Supabase ke format aplikasi
         return convertFromSupabase(data);
     } catch (error) {
         console.error('Error in getSantriById:', error);
@@ -135,9 +135,9 @@ async function getSantriById(id) {
 }
 
 /**
- * Insert new santri data
- * @param {Object} santriData - Santri data object (camelCase)
- * @returns {Promise<Object|null>} Created santri data (camelCase) or null
+ * Tambah data santri baru
+ * @param {Object} santriData - Objek data santri (camelCase)
+ * @returns {Promise<Object|null>} Data santri yang kebuat (camelCase) atau null
  */
 async function insertSantri(santriData) {
     try {
@@ -157,7 +157,7 @@ async function insertSantri(santriData) {
             return null;
         }
         
-        // Prepare data for Supabase (map camelCase to snake_case)
+        // Siapin data buat Supabase (map camelCase ke snake_case)
         const dataToInsert = {
             nomor_stambuk: santriData.nomorStambuk || null,
             nama: santriData.nama || null,
@@ -187,7 +187,7 @@ async function insertSantri(santriData) {
             return null;
         }
         
-        // Convert back to camelCase format
+        // Balikin lagi ke format camelCase
         return convertFromSupabase(data);
     } catch (error) {
         console.error('Error in insertSantri:', error);
@@ -199,10 +199,10 @@ async function insertSantri(santriData) {
 }
 
 /**
- * Update existing santri data
- * @param {string} id - Santri ID
- * @param {Object} santriData - Updated santri data (camelCase)
- * @returns {Promise<Object|null>} Updated santri data (camelCase) or null
+ * Update data santri yang udah ada
+ * @param {string} id - ID santri
+ * @param {Object} santriData - Data santri yang diupdate (camelCase)
+ * @returns {Promise<Object|null>} Data santri yang ke-update (camelCase) atau null
  */
 async function updateSantri(id, santriData) {
     try {
@@ -222,7 +222,7 @@ async function updateSantri(id, santriData) {
             return null;
         }
         
-        // Prepare data for Supabase (map camelCase to snake_case)
+        // Siapin data buat Supabase (map camelCase ke snake_case)
         const dataToUpdate = {
             nomor_stambuk: santriData.nomorStambuk || null,
             nama: santriData.nama || null,
@@ -257,7 +257,7 @@ async function updateSantri(id, santriData) {
             return null;
         }
         
-        // Convert back to camelCase format
+        // Balikin lagi ke format camelCase
         return convertFromSupabase(data);
     } catch (error) {
         console.error('Error in updateSantri:', error);
@@ -269,9 +269,9 @@ async function updateSantri(id, santriData) {
 }
 
 /**
- * Delete santri by ID
- * @param {string} id - Santri ID
- * @returns {Promise<boolean>} Success status
+ * Hapus data santri dari ID
+ * @param {string} id - ID santri
+ * @returns {Promise<boolean>} Status berhasil atau nggak
  */
 async function deleteSantriById(id) {
     try {
@@ -314,7 +314,7 @@ async function deleteSantriById(id) {
     }
 }
 
-// Prestasi Santri
+// Data prestasi santri
 async function getPrestasi() {
     try {
         const client = getSupabaseClient();
@@ -394,7 +394,7 @@ async function deletePrestasi(id) {
     }
 }
 
-// Catatan Santri
+// Data catatan santri
 async function getCatatan() {
     try {
         const client = getSupabaseClient();
@@ -950,9 +950,9 @@ async function deletePrestasiKeteranganOption(id) {
 }
 
 /**
- * Convert Supabase data (snake_case) to app format (camelCase)
- * @param {Object} supabaseData - Data from Supabase
- * @returns {Object} Converted data
+ * Ubah data Supabase (snake_case) ke format aplikasi (camelCase)
+ * @param {Object} supabaseData - Data dari Supabase
+ * @returns {Object} Data hasil konversi
  */
 function convertFromSupabase(supabaseData) {
     if (!supabaseData) return null;
@@ -977,16 +977,16 @@ function convertFromSupabase(supabaseData) {
 }
 
 /**
- * Convert array of Supabase data to app format
- * @param {Array} supabaseDataArray - Array of data from Supabase
- * @returns {Array} Array of converted data
+ * Ubah array data Supabase ke format aplikasi
+ * @param {Array} supabaseDataArray - Daftar data dari Supabase
+ * @returns {Array} Daftar data hasil konversi
  */
 function convertArrayFromSupabase(supabaseDataArray) {
     if (!Array.isArray(supabaseDataArray)) return [];
     return supabaseDataArray.map(convertFromSupabase).filter(item => item !== null);
 }
 
-// Helper function for notifications (fallback if not defined)
+// Fungsi helper buat notifikasi (cadangan kalau belum ada)
 if (typeof showNotification === 'undefined') {
     window.showNotification = function(message, type = 'info') {
         console.log(`[${type.toUpperCase()}] ${message}`);

@@ -1,4 +1,4 @@
-// Detail Page - Display Complete Biodata of Santri
+// Halaman detail buat nampilin biodata lengkap santri
 
 let santriId = null;
 let santriData = null;
@@ -7,11 +7,11 @@ function statusClassName(status) {
     return (status || '').toLowerCase().replace(/\s+/g, '-');
 }
 
-// Initialize detail page
+// Mulai halaman detail
 document.addEventListener('DOMContentLoaded', async () => {
     const role = await requireAuth();
     if (!role) return;
-    // Get ID from URL parameter
+    // Ambil ID dari parameter URL
     const urlParams = new URLSearchParams(window.location.search);
     santriId = urlParams.get('id');
     
@@ -20,12 +20,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     
-    // Wait for Supabase to initialize
+    // Tunggu Supabase siap
     await new Promise(resolve => setTimeout(resolve, 500));
     await loadSantriData();
 });
 
-// Load santri data from Supabase
+// Ambil data santri dari Supabase
 async function loadSantriData() {
     try {
         santriData = await getSantriById(santriId);
@@ -51,7 +51,7 @@ async function loadSantriData() {
     }
 }
 
-// Display santri detail
+// Tampilkan detail santri
 function displaySantriDetail() {
     const loadingState = document.getElementById('loading-state');
     const errorState = document.getElementById('error-state');
@@ -61,7 +61,7 @@ function displaySantriDetail() {
     errorState.style.display = 'none';
     detailContent.style.display = 'block';
     
-    // Format date
+    // Format tanggal
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         try {
@@ -76,7 +76,7 @@ function displaySantriDetail() {
         }
     };
     
-    // Display data
+    // Tampilkan data
     document.getElementById('detail-nama').textContent = santriData.nama || '-';
     document.getElementById('detail-nama-lengkap').innerHTML = `<strong>${escapeHtml(santriData.nama || '-')}</strong>`;
     document.getElementById('detail-nomor-stambuk').textContent = santriData.nomorStambuk || '-';
@@ -89,14 +89,14 @@ function displaySantriDetail() {
     document.getElementById('detail-asrama').textContent = santriData.asrama || '-';
     document.getElementById('detail-konsulat').textContent = santriData.konsulat || '-';
     
-    // Status with badge
+    // Status pakai badge
     const status = santriData.status || '-';
     const statusClass = statusClassName(status);
     document.getElementById('detail-status').textContent = status;
     document.getElementById('detail-status').className = `badge badge-${statusClass}`;
     document.getElementById('detail-status-value').innerHTML = `<span class="badge badge-${statusClass}">${escapeHtml(status)}</span>`;
     
-    // Dates
+    // Tanggal penting
     document.getElementById('detail-created').textContent = formatDate(santriData.createdAt);
     
     if (santriData.updatedAt && santriData.updatedAt !== santriData.createdAt) {
@@ -144,7 +144,7 @@ function renderKelasHistory(formatDate) {
     }).join('');
 }
 
-// Show error state
+// Tampilkan kondisi error
 function showError() {
     const loadingState = document.getElementById('loading-state');
     const errorState = document.getElementById('error-state');
@@ -162,7 +162,7 @@ function editSantri() {
     }
 }
 
-// Delete santri
+// Hapus santri
 async function deleteSantri() {
     if (!confirm('Apakah Anda yakin ingin menghapus data santri ini?')) {
         return;
@@ -174,7 +174,7 @@ async function deleteSantri() {
         if (success) {
             showNotification('Data berhasil dihapus!', 'success');
             
-            // Redirect to list after 1 second
+            // Balikin ke list setelah 1 detik
             setTimeout(() => {
                 window.location.href = 'list.html';
             }, 1000);
@@ -185,7 +185,7 @@ async function deleteSantri() {
     }
 }
 
-// Show notification
+// Tampilkan notifikasi
 function showNotification(message, type = 'info') {
     const existing = document.querySelector('.notification');
     if (existing) {
@@ -249,7 +249,7 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Escape HTML
+// Amankan HTML
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');

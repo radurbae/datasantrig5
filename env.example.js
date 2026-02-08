@@ -1,3 +1,3 @@
-// Salin file ini menjadi env.js (jangan di-commit) dan isi dengan kredensial runtime
+// Salin file ini jadi env.js (jangan di-commit), terus isi kredensial runtime
 window.__SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
 window.__SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';

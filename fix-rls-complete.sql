@@ -1,15 +1,10 @@
--- =====================================================
 -- FIX LENGKAP: RLS Policy untuk Role Wali Kelas
--- =====================================================
 -- Jalankan SQL ini di Supabase SQL Editor
 -- PASTIKAN JALANKAN STEP BY STEP!
--- =====================================================
 
 
--- =====================================================
 -- STEP 0: DEBUG - Cek apakah wali_kelas sudah ada di profiles
 -- Jalankan ini DULU untuk memastikan role tersimpan benar!
--- =====================================================
 
 -- Cek semua user beserta role nya
 SELECT id, role, wali_kelas, created_at 
@@ -19,9 +14,7 @@ ORDER BY created_at DESC;
 -- Jika wali_kelas tidak terlihat, mungkin ada masalah dengan trigger atau data
 
 
--- =====================================================
 -- STEP 1: Cek RLS sudah diaktifkan
--- =====================================================
 
 SELECT 
     tablename,
@@ -31,9 +24,7 @@ WHERE schemaname = 'public'
 AND tablename IN ('raport_mental', 'prestasi_santri', 'catatan_santri', 'profiles');
 
 
--- =====================================================
 -- STEP 2: Cek policy yang ada saat ini
--- =====================================================
 
 SELECT 
     tablename, 
@@ -48,18 +39,14 @@ WHERE tablename IN ('raport_mental', 'prestasi_santri', 'catatan_santri', 'profi
 ORDER BY tablename, cmd;
 
 
--- =====================================================
 -- STEP 3: Pastikan RLS Enabled
--- =====================================================
 
 ALTER TABLE raport_mental ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prestasi_santri ENABLE ROW LEVEL SECURITY;
 ALTER TABLE catatan_santri ENABLE ROW LEVEL SECURITY;
 
 
--- =====================================================
 -- STEP 4: DROP semua policy lama
--- =====================================================
 
 -- RAPORT_MENTAL
 DROP POLICY IF EXISTS "raport_insert" ON raport_mental;
@@ -104,12 +91,10 @@ DROP POLICY IF EXISTS "Allow admin delete" ON catatan_santri;
 DROP POLICY IF EXISTS "Allow authenticated select" ON catatan_santri;
 
 
--- =====================================================
 -- STEP 5: CREATE policy baru dengan role yang benar
 -- KUNCINYA: Role 'wali_kelas' harus EXACT MATCH!
--- =====================================================
 
--- ============ RAPORT_MENTAL ============
+-- RAPORT_MENTAL
 
 -- INSERT: Admin dan Wali Kelas bisa insert
 CREATE POLICY "raport_mental_insert" ON raport_mental
@@ -150,7 +135,7 @@ FOR SELECT TO authenticated
 USING (true);
 
 
--- ============ PRESTASI_SANTRI ============
+-- PRESTASI_SANTRI
 
 -- INSERT: Admin dan Wali Kelas bisa insert
 CREATE POLICY "prestasi_santri_insert" ON prestasi_santri
@@ -191,7 +176,7 @@ FOR SELECT TO authenticated
 USING (true);
 
 
--- ============ CATATAN_SANTRI ============
+-- CATATAN_SANTRI
 
 -- INSERT: Admin dan Wali Kelas bisa insert
 CREATE POLICY "catatan_santri_insert" ON catatan_santri
@@ -232,10 +217,8 @@ FOR SELECT TO authenticated
 USING (true);
 
 
--- =====================================================
 -- STEP 6: PENTING! Pastikan profiles table punya policy SELECT
 -- Jika profiles tidak bisa di-select, policy di atas tidak akan bekerja!
--- =====================================================
 
 -- DROP existing policies jika ada
 DROP POLICY IF EXISTS "profiles_select" ON profiles;
@@ -264,9 +247,7 @@ FOR UPDATE TO authenticated
 USING (auth.uid() = id);
 
 
--- =====================================================
 -- STEP 7: Verifikasi policy baru
--- =====================================================
 
 SELECT 
     tablename, 
@@ -281,9 +262,7 @@ WHERE tablename IN ('raport_mental', 'prestasi_santri', 'catatan_santri', 'profi
 ORDER BY tablename, cmd;
 
 
--- =====================================================
 -- STEP 8: TEST dengan user wali_kelas (ganti ID sesuai user!)
--- =====================================================
 
 -- Test: Cek apakah user tertentu punya role wali_kelas
 -- SELECT id, role, wali_kelas FROM profiles WHERE role = 'wali_kelas';

@@ -1,4 +1,4 @@
-// List Page - Display and Manage Santri Data
+// Halaman list buat lihat dan kelola data santri
 
 let santriData = [];
 let filteredData = [];
@@ -29,12 +29,12 @@ function setSelectValueByKelasKey(select, kelasKey) {
     }
 }
 
-// Initialize list page
+// Mulai halaman list
 document.addEventListener('DOMContentLoaded', async () => {
     const role = await requireAuth();
     if (!role) return;
     setupEventListeners();
-    // Wait for Supabase to initialize
+    // Tunggu Supabase siap
     await new Promise(resolve => setTimeout(resolve, 500));
     await loadData();
     renderTable();
@@ -63,7 +63,7 @@ function sortByKelasAndAbsen(a, b) {
     return (a.nama || '').localeCompare(b.nama || '', 'id');
 }
 
-// Load data from Supabase
+// Ambil data dari Supabase
 async function loadData() {
     try {
         santriData = await getAllSantri();
@@ -84,7 +84,7 @@ async function loadData() {
     }
 }
 
-// Setup event listeners
+// Pasang event listener
 function setupEventListeners() {
     const searchInput = document.getElementById('search-input');
     const filterKelas = document.getElementById('filter-kelas');
@@ -142,7 +142,7 @@ function applyDefaultStatusFilter() {
     applyFilters('');
 }
 
-// Render table
+// Tampilkan tabel
 function renderTable() {
     const tbody = document.getElementById('santri-tbody');
     
@@ -185,12 +185,12 @@ function renderTable() {
     updatePagination();
 }
 
-// Edit santri - redirect to form page
+// Edit santri, terus pindah ke halaman form
 function editSantri(id) {
     window.location.href = `form.html?edit=${id}`;
 }
 
-// Delete santri
+// Hapus santri
 async function deleteSantri(id) {
     if (!confirm('Apakah Anda yakin ingin menghapus data santri ini?')) {
         return;
@@ -201,7 +201,7 @@ async function deleteSantri(id) {
         
         if (success) {
             showNotification('Data berhasil dihapus!', 'success');
-            // Reload data from Supabase
+            // Muat ulang data dari Supabase
             await loadData();
         }
     } catch (error) {
@@ -210,31 +210,31 @@ async function deleteSantri(id) {
     }
 }
 
-// View detail - redirect to detail page
+// Lihat detail, terus pindah ke halaman detail
 function viewDetail(id) {
     window.location.href = `detail.html?id=${id}`;
 }
 
-// Handle search
+// Proses pencarian
 function handleSearch() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
     applyFilters(searchTerm);
 }
 
-// Handle filter
+// Proses filter
 function handleFilter() {
     const searchTerm = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
     applyFilters(searchTerm);
 }
 
-// Apply all filters
+// Terapkan semua filter
 function applyFilters(searchTerm = '') {
     const filterKelas = document.getElementById('filter-kelas')?.value || '';
     const filterDaerah = document.getElementById('filter-daerah')?.value || '';
     const filterStatus = document.getElementById('filter-status')?.value || '';
 
     filteredData = santriData.filter(santri => {
-        // Search filter
+        // Filter pencarian
         const matchesSearch = !searchTerm || 
             (santri.nama && santri.nama.toLowerCase().includes(searchTerm)) ||
             (santri.kelas && santri.kelas.toLowerCase().includes(searchTerm)) ||
@@ -242,13 +242,13 @@ function applyFilters(searchTerm = '') {
             (santri.konsulat && santri.konsulat.toLowerCase().includes(searchTerm)) ||
             (santri.nomorStambuk && santri.nomorStambuk.toLowerCase().includes(searchTerm));
 
-        // Kelas filter
+        // Filter kelas
         const matchesKelas = !filterKelas || (santri.kelas && santri.kelas === filterKelas);
 
-        // Daerah filter
+        // Filter daerah
         const matchesDaerah = !filterDaerah || (santri.daerah && santri.daerah === filterDaerah);
 
-        // Status filter
+        // Filter status
         const matchesStatus = !filterStatus || (santri.status && santri.status === filterStatus);
 
         return matchesSearch && matchesKelas && matchesDaerah && matchesStatus;
@@ -258,7 +258,7 @@ function applyFilters(searchTerm = '') {
     renderTable();
 }
 
-// Update filter options
+// Update pilihan filter
 function updateFilterOptions() {
     const kelas = [...new Set(santriData.map(s => s.kelas).filter(Boolean))].sort();
     const daerah = [...new Set(santriData.map(s => s.daerah).filter(Boolean))].sort();
@@ -268,7 +268,7 @@ function updateFilterOptions() {
 
     if (!kelasSelect || !daerahSelect) return;
 
-    // Update kelas options
+    // Update pilihan kelas
     const currentKelas = kelasSelect.value;
     kelasSelect.innerHTML = '<option value="">Semua Kelas</option>' +
         kelas.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(k)}</option>`).join('');
@@ -276,7 +276,7 @@ function updateFilterOptions() {
         kelasSelect.value = currentKelas;
     }
 
-    // Update daerah options
+    // Update pilihan daerah
     const currentDaerah = daerahSelect.value;
     daerahSelect.innerHTML = '<option value="">Semua Daerah</option>' +
         daerah.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
@@ -285,7 +285,7 @@ function updateFilterOptions() {
     }
 }
 
-// Update stats
+// Update statistik
 function updateStats() {
     const total = santriData.length;
     const filtered = filteredData.length;
@@ -318,15 +318,15 @@ function updatePagination() {
     }
 }
 
-// Show notification
+// Tampilkan notifikasi
 function showNotification(message, type = 'info') {
-    // Remove existing notification if any
+    // Hapus notifikasi lama kalau ada
     const existing = document.querySelector('.notification');
     if (existing) {
         existing.remove();
     }
 
-    // Create notification element
+    // Bikin elemen notifikasi
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.style.cssText = `
@@ -344,7 +344,7 @@ function showNotification(message, type = 'info') {
     `;
     notification.textContent = message;
 
-    // Add animation style if not exists
+    // Tambahin style animasi kalau belum ada
     if (!document.getElementById('notification-style')) {
         const style = document.createElement('style');
         style.id = 'notification-style';
@@ -385,7 +385,7 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Escape HTML to prevent XSS
+// Amankan HTML biar gak kena XSS
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -393,7 +393,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Make functions available globally for onclick handlers
+// Biar fungsi bisa dipanggil global dari onclick
 window.editSantri = editSantri;
 window.deleteSantri = deleteSantri;
 window.viewDetail = viewDetail;
